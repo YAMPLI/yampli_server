@@ -1,5 +1,4 @@
 const express = require('express');
-const { UserService } = require('../../services');
 const { userController } = require('../../controllers');
 const authValidation = require('../../validations/auth.validations');
 const validate = require('../middlewares/validate');
