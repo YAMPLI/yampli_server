@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon src/app.js",
-    "test": "nodemon socketTest.js"
+    "dev": "NODE_ENV=development nodemon src/app.js"
   },
   "keywords": [],
   "author": "",
@@ -17,10 +17,14 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
     "joi": "^17.8.3",
+    "memorystore": "^1.6.7",
     "mongoose": "^6.9.0",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.20",
+    "passport": "^0.6.0",
+    "passport-kakao": "^1.0.1",
     "path": "^0.12.7",
     "python-shell": "^5.0.0",
     "socket.io": "^4.6.1",
