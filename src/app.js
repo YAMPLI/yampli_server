@@ -7,6 +7,7 @@ const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const passport = require('passport');
 const passportConfig = require('./config/passport');
+const cors = require('cors');
 
 const app = express();
 
@@ -14,7 +15,7 @@ const port = process.env.PORT || 8000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(cors({ credentials: true, origin: process.env.CLIENT_HOST }));
 conn();
 passportConfig();
 app.use(
@@ -31,6 +32,10 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api', route);
+// app.use('/api', route);
+
+app.get('/api', (req, res) => {
+  res.json({ title: 'FE 연결 테스트' });
+});
 
 app.listen(port, () => console.log('server listening on port' + port));
