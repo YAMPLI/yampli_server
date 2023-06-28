@@ -10,7 +10,7 @@ const register = {
         .string()
         .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
         .lowercase(),
-      userNickname: joi.string().required().min(3).max(30),
+      userNickname: joi.string().required().min(1).max(30),
     })
     .options({ allowUnknown: true }),
 };
