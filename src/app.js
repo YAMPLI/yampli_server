@@ -32,10 +32,11 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.use('/api', route);
+app.use('/api', route);
 
-app.get('/api', (req, res) => {
-  res.json({ title: 'FE 연결 테스트' });
-});
+// 리액트 FE 연결 테스트
+// app.get('/api', (req, res) => {
+//   res.json({ title: 'FE 연결 테스트' });
+// });
 
 app.listen(port, () => console.log('server listening on port' + port));
