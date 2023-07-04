@@ -7,6 +7,7 @@ const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const passport = require('passport');
 const passportConfig = require('./config/passport');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const app = express();
@@ -15,12 +16,13 @@ const port = process.env.PORT || 8000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(cors({ credentials: true, origin: process.env.CLIENT_HOST }));
 conn();
 passportConfig();
 app.use(
   session({
-    cookie: { maxAge: 86400000 },
+    cookie: { maxAge: 86400000, secure: false },
     store: new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     }),
