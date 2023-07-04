@@ -14,19 +14,9 @@ router.route('/authcheck').get((req, res) => {
   res.send(sendData);
 });
 
-router.route('/kakao').get(passport.authenticate('kakao'), () => {
-  console.log('/kakao');
-});
-router.route('/kakao/callback').get(passport.authenticate('kakao', { failureRedirect: '/api' }), (req, res) => {
+router.route('/kakao/oauth').get(passport.authenticate('kakao', { failureRedirect: '/api' }), (req, res) => {
   console.log(`req : ${res}`);
-  res.redirect('http://localhost:3000/');
+  res.status(200).json({ token: 'to' });
 });
 
-// router.route('/kakao/callback').get(
-//   passport.authenticate('kakao', (authError, user, info) => {
-//     console.log(authError);
-//     console.log(user);
-//     console.log(info);
-//   }),
-// );
 module.exports = router;
