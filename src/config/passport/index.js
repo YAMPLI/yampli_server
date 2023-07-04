@@ -16,11 +16,7 @@ module.exports = () => {
   // 해당 유저 정보가 있으면 done을 통해 req.user에 저장
   // serializeUser에서 done으로 넘겨주는 user가 deserializeUser의 첫 번째 매개변수로 전달되기 때문에 둘의 타입은 항상 일치 필요
   passport.deserializeUser(async (id, done) => {
-    const da = await User.findById(id);
-    // 실제 db의 컬럼으로 비교하지 않음
-    // models에 생성한 user.model.js에서 비교
-    // name은 없음... userName으로 생성
-    console.log(da);
+    console.log('deserializeUser');
     User.findById(id)
       .then((user) => {
         done(null, user);
