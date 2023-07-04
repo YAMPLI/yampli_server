@@ -42,7 +42,7 @@ const createJWT = (userInfo) => {
     {
       userId: userInfo.id,
       userEmail: userInfo.userEmail,
-      userNickname: userInfo.uerNickname,
+      userNickname: userInfo.userNickname,
     },
     process.env.JWT_SECRET,
   );
