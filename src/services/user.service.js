@@ -1,4 +1,5 @@
 const { User } = require('../models');
+const jwt = require('jsonwebtoken');
 
 /**
  * Create a user
@@ -32,8 +33,23 @@ const updateUserById = async (userId, userData) => {
   return user;
 };
 
+/**
+ * JWT 생성
+ */
+
+const createJWT = (userInfo) => {
+  return jwt.sign(
+    {
+      userId: userInfo.id,
+      userEmail: userInfo.userEmail,
+      userNickname: userInfo.uerNickname,
+    },
+    process.env.JWT_SECRET,
+  );
+};
 module.exports = {
   createUser,
   getUserById,
   updateUserById,
+  createJWT,
 };

@@ -21,6 +21,7 @@ module.exports = () => {
       .then((user) => {
         done(null, user);
         console.log('deserializeUser check');
+        console.log(user);
       })
       .catch((err) => done(err));
   });
