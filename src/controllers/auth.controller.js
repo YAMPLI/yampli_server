@@ -1,15 +1,17 @@
-// const { authService } = require('../services');
+const { authService } = require('../services');
+const { userService } = require('../services');
+const { StatusCodes } = require('http-status-codes');
+const passport = require('passport');
 
-// const kakaoLogin = async (req, res) => {
-//   try {
-//     const user = await authService.kakaoLogin(req);
-//     console.log(user);
-//     res.json({ status: 'success' });
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-// module.exports = {
-//   kakaoLogin,
-// };
+const kakaoLoginCallback = async (req, res, next) => {
+  passport.authenticate('kakao', { failureRedirect: '/' }, async (err, user) => {
+    if (err) return next(err);
+    const userId = user.id;
+    const userInfo = await userService.getUserById(userId);
+    const token = await userService.createJWT(userInfo);
+    res.status(StatusCodes.OK).json({ token });
+  })(req, res, next);
+};
+module.exports = {
+  kakaoLoginCallback,
+};
