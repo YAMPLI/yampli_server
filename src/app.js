@@ -9,7 +9,8 @@ const passport = require('passport');
 const passportConfig = require('./config/passport');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-
+const webSocket = require('../socket');
+const errorHandler = require('./api/middlewares/errorHandler');
 const app = express();
 
 const port = process.env.PORT || 8000;
@@ -35,10 +36,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/api', route);
+app.use(errorHandler);
 
-// 리액트 FE 연결 테스트
-// app.get('/api', (req, res) => {
-//   res.json({ title: 'FE 연결 테스트' });
-// });
-
-app.listen(port, () => console.log('server listening on port' + port));
+// 소켓연결
+const server = app.listen(port, () => console.log('server listening on port' + port));
+webSocket(server, app);
