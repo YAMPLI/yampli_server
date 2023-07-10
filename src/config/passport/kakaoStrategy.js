@@ -27,7 +27,7 @@ module.exports = () => {
           const exUser = await User.findOne({
             // User 모델에는 eamil 타입은 없고 userEamil이 존재
             // 자\꾸 User 모델에 없는 email을 비교하려고 하니까 그냥 findOne해서 최상위 데이터 가져오고있었음.
-            userId: profile._json.id,
+            id: profile._json.id,
           });
           // 이미 가입된 카카오 프로필이면 성공
           if (exUser) {
@@ -36,11 +36,11 @@ module.exports = () => {
           } else {
             // 가입되지 않는 유저면 회원가입 시키고 로그인을 시킨다
             const newUser = await User.create({
-              userId: profile.id,
-              userName: profile.username,
-              userEmail: profile._json && profile._json.kakao_account.email,
-              userNickname: profile.displayName,
-              userImg: profile._json.properties.thumbnail_image,
+              kakaoId: profile.id,
+              name: profile.username,
+              email: profile._json && profile._json.kakao_account.email,
+              nickname: profile.displayName,
+              img: profile._json.properties.thumbnail_image,
             });
             done(null, newUser); // 회원가입하고 로그인 인증 완료
           }

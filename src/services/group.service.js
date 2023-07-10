@@ -10,11 +10,11 @@ const createGroup = async (groupInfo) => {
 
 // 그룹, 그룹에 속한 유저 정보 반환
 const findGroupUserInfo = async (userInfo) => {
-  return await Group.find({ joinUser: userInfo }).populate('joinUser');
+  return await Group.find({ user: userInfo }).populate('joinUser');
 };
 
-const checkGroup = async (groupName, userId) => {
-  return await Group.find({ groupName, joinUser: { $in: userId } });
+const checkGroup = async (groupTitle, userId) => {
+  return await Group.find({ title: groupTitle, user: { $in: userId } });
 };
 
 const findGroup = async (userInfo) => {

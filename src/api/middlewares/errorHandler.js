@@ -1,6 +1,8 @@
 const logger = require('../../config/logger');
 const { StatusCodes } = require('http-status-codes');
 const errorHandler = (err, req, res, next) => {
+  console.log('츄라이');
+
   let customError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
     errMessage: err.message || '다시 시도해 주세요.',

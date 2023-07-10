@@ -6,7 +6,7 @@ const passport = require('passport');
 const kakaoLoginCallback = async (req, res, next) => {
   passport.authenticate('kakao', { failureRedirect: '/' }, async (err, user) => {
     if (err) return next(err);
-    const userId = user.id;
+    const userId = user._id;
     const userInfo = await userService.getUserById(userId);
     const token = await userService.createJWT(userInfo);
     res.status(StatusCodes.OK).json({ token });
