@@ -9,8 +9,8 @@ const createGroup = async (req, res) => {
     throw new ConflictError('그룹 이름을 작성해주세요.');
   }
   const groupInfo = {
-    groupName: groupTitle,
-    joinUser: user.id,
+    title: groupTitle,
+    user: user.id,
   };
   const findGroup = await groupService.checkGroup(groupTitle, user.id);
 
@@ -20,10 +20,10 @@ const createGroup = async (req, res) => {
 
   const newGroup = await groupService.createGroup(groupInfo);
 
-  const playlistName = groupTitle + '그룹 플레이리스트';
+  const playlistTitle = groupTitle + '그룹 플레이리스트';
   const playListInfo = {
-    playlistName,
-    joinGroup: newGroup.id,
+    title: playlistTitle,
+    group: newGroup.id,
   };
   await playlistService.createPlaylist(playListInfo);
   res.status(StatusCodes.OK);
@@ -31,7 +31,7 @@ const createGroup = async (req, res) => {
 
 const getGroup = async (req, res) => {
   const user = req.locals;
-  const userInfo = { joinUser: user.id };
+  const userInfo = { user: user.id };
   const group = await groupService.findGroup(userInfo);
   res.status(StatusCodes.OK).json(group);
 };
