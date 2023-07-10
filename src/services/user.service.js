@@ -47,9 +47,14 @@ const createJWT = (userInfo) => {
     process.env.JWT_SECRET,
   );
 };
+
+const findUserGroup = async (userInfo) => {
+  return User.find({ userId: userInfo }).populate('groups').exec();
+};
 module.exports = {
   createUser,
   getUserById,
   updateUserById,
   createJWT,
+  findUserGroup,
 };
