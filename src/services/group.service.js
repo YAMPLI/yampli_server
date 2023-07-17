@@ -10,7 +10,7 @@ const createGroup = async (groupInfo) => {
 
 // 그룹, 그룹에 속한 유저 정보 반환
 const findGroupUserInfo = async (userInfo) => {
-  return await Group.find({ user: userInfo }).populate('joinUser');
+  return await Group.find({ user: userInfo }).populate('user');
 };
 
 const checkGroup = async (groupTitle, userId) => {
@@ -18,7 +18,12 @@ const checkGroup = async (groupTitle, userId) => {
 };
 
 const findGroup = async (userInfo) => {
-  return await Group.find({ userInfo });
+  return await Group.find({ user: userInfo });
+};
+
+// 그룹이 관리하는 플레이리스트
+const findGroupPlaylist = async (userInfo) => {
+  return await Group.find({ user: userInfo }).populate('user');
 };
 
 module.exports = {
@@ -26,4 +31,5 @@ module.exports = {
   findGroupUserInfo,
   findGroup,
   checkGroup,
+  findGroupPlaylist,
 };
