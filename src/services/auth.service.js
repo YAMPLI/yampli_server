@@ -17,7 +17,7 @@
 //         grant_type: 'authorization_code',
 //         client_id: process.env.CLIENT_ID,
 //         code,
-//         redirect_uri: 'http://127.0.0.1:3306/api/auth/kakao/start',
+//         redirect_uri: 'http://127.0.0.1:5000/api/auth/kakao/start',
 //       },
 //     },
 //   );
