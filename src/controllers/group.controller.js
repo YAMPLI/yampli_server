@@ -31,8 +31,7 @@ const createGroup = async (req, res) => {
 
 const getGroup = async (req, res) => {
   const user = req.locals;
-  const userInfo = { user: user.id };
-  const group = await groupService.findGroup(userInfo);
+  const group = await groupService.findGroup(user.id);
   res.status(StatusCodes.OK).json(group);
 };
 
