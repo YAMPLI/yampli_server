@@ -16,6 +16,7 @@ const getPlaylistSong = async (req, res) => {
   return res.status(StatusCodes.OK).json(songs);
 };
 
+};
 const getPlaylistSongSocket = async (req, res) => {
   const playlistId = req.params.id;
   const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
