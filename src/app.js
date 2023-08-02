@@ -6,7 +6,7 @@ const conn = require('./config/conn.js');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const passport = require('passport');
-const passportConfig = require('./config/passport');
+const passportConfig = require('./config/passport/passportConfig'); // 함수를 호출해서 모듈 객체를 가져옴
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const webSocket = require('../socket');
@@ -15,12 +15,18 @@ const app = express();
 
 const port = process.env.PORT || 8000;
 
+app.enable('trust proxy');
+// 모든 IP가 trustable하므로 XFF의 첫 번째 아이피(client-ip)가 req.ip값에 설정된다.
+app.set('trust proxy', () => true);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({ credentials: true, origin: process.env.CLIENT_HOST }));
+// origin -> ngrok 테스트 완료 후 CLIENT_HOST로 변경
+app.use(cors({ credentials: true, origin: process.env.NGROK_URI }));
 conn();
-passportConfig();
+// passportConfig();
+
 app.use(
   session({
     cookie: { maxAge: 86400000, secure: false },
@@ -29,8 +35,10 @@ app.use(
     }),
     resave: false,
     secret: 'keyboard cat',
+    saveUninitialized: false,
   }),
 );
+
 // passport-> 세션 설정 후 미들웨어 등록
 app.use(passport.initialize());
 app.use(passport.session());

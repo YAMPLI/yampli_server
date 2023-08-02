@@ -5,7 +5,7 @@ const song = require('../../models/song.models');
 const playlist = require('../../models/playlist.model');
 const router = express.Router();
 
-// http://localhost:3306/api/group/test/123123
+// http://localhost:5000/api/group/test/123123
 // 그룹 선택 후 플레이리스트 id 전송해서 캡쳐진행
 // router.route('/:id').get(async (req, res) => {
 //   const socket = req.app.get('io');
@@ -16,6 +16,10 @@ const router = express.Router();
 //   res.send(200);
 // });
 
+// 파이썬 캡쳐 동작
+router.route('/socket/:id').get(asyncWrap(playlistController.getPlaylistSongSocket));
+
+// 플레이리스트 목록 보기
 router.route('/:id').get(asyncWrap(playlistController.getPlaylistSong));
 
 // 노래 추가 임시
