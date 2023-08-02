@@ -5,6 +5,7 @@ const { StatusCodes } = require('http-status-codes');
 const createGroup = async (req, res) => {
   const user = req.locals;
   const groupTitle = req.body.title;
+
   if (!groupTitle) {
     throw new ConflictError('그룹 이름을 작성해주세요.');
   }
