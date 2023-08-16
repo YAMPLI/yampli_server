@@ -7,11 +7,15 @@ const getPlaylistSong = async (req, res) => {
   if (!playlistId) {
     throw new ConflictError('존재하지 않는 플레이리스트 입니다.');
   }
+  const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  console.log(clientIp);
   const socket = req.app.get('io');
+  const connectUser = req.app.get('connectUser');
+  console.log(connectUser[clientIp]);
+  socket.to(connectUser[clientIp]).emit('playlist', playlistId);
 
   socket.emit('user', playlistId);
   const playlist = await playlistService.findPlaylistSong(playlistId);
-  console.log(playlist);
   const songs = playlist.song;
   return res.status(StatusCodes.OK).json(songs);
 };
