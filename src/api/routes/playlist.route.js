@@ -17,7 +17,10 @@ const router = express.Router();
 // });
 
 // 파이썬 캡쳐 동작
-router.route('/socket/:id').get(asyncWrap(playlistController.getPlaylistSongSocket));
+// router.route('/socket/:id').get(asyncWrap(playlistController.getPlaylistSongSocket));
+
+// 디자인 확인 위한 임시 라우터
+router.route('/socket/:id').get(asyncWrap(playlistController.getPlaylistSong));
 
 // 플레이리스트 목록 보기
 router.route('/:id').get(asyncWrap(playlistController.getPlaylistSong));
