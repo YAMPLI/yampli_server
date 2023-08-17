@@ -8,7 +8,7 @@ const arrayExists = (arr, target) => {
 };
 
 const getLastIndexOfDollarSign = (input) => {
-  return input.lastIndexOf('$');
+  return input.lastIndexOf('&');
 };
 
 const extractSublistFromIndexToEnd = (input, startIndex) => {
@@ -16,8 +16,9 @@ const extractSublistFromIndexToEnd = (input, startIndex) => {
 };
 
 const removeTimeInfo = (input) => {
-  let regex = /(오전|오후).+$/;
-  return input.replace(regex, '').trim();
+  let regex = /(오전|오후|이후).+$/;
+  let regex1 = /(오전|오후|2후)?\s*(\d+)(?::\d+)?.+$/;
+  return input.replace(regex1, '').trim();
 };
 
 module.exports = {

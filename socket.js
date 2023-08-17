@@ -11,6 +11,7 @@ module.exports = (server, app) => {
   app.set('io', io);
   app.set('connectUser', users);
   app.set('userText', userArray);
+
   io.on('connection', (socket) => {
     // 웹소켓 연결 시
     const req = socket.request;
@@ -33,12 +34,10 @@ module.exports = (server, app) => {
     });
     //* 클라이언트에서 전송받은 데이터 출력하고 확인 메시지 전송
     socket.on('text', (data) => {
-      // 두개 연결해서 userArray[socket.id]를 생성하고
-      // 텍스트 컨트롤러에서 각각 잘 불러오는지 확인하기
       console.log(data);
-      const processedText = socketTextProcessingController.processList(data, userArray, socket.id);
+      const processedText = socketTextProcessingController.processList(data, userArray, socket.id, app, ip, users);
       console.log(processedText);
-      socket.emit('check', socket.id + ' ::: ' + processedText);
+      // socket.emit('check', socket.id + ' ::: ' + processedText);
     });
     socket.on('clientIp', (data) => {
       console.log('client IP : ' + data);
