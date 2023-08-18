@@ -35,7 +35,7 @@ module.exports = (server, app) => {
     //* 클라이언트에서 전송받은 데이터 출력하고 확인 메시지 전송
     socket.on('text', (data) => {
       console.log(data);
-      const processedText = socketTextProcessingController.processList(data, userArray, socket.id, app, ip, users);
+      const processedText = socketTextProcessingController.processList(data.data, userArray, socket.id, app, ip, users);
       console.log(processedText);
       // socket.emit('check', socket.id + ' ::: ' + processedText);
     });
