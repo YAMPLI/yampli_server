@@ -34,10 +34,20 @@ module.exports = (server, app) => {
     });
     //* 클라이언트에서 전송받은 데이터 출력하고 확인 메시지 전송
     socket.on('text', (data) => {
-      console.log(data);
-      const processedText = socketTextProcessingController.processList(data.data, userArray, socket.id, app, ip, users);
-      console.log(processedText);
-      // socket.emit('check', socket.id + ' ::: ' + processedText);
+      console.log(data.data);
+      try {
+        const processedText = socketTextProcessingController.processList(
+          data.data.data,
+          userArray,
+          socket.id,
+          app,
+          ip,
+          users,
+        );
+      } catch (error) {
+        // 클라이언트에 에러 메세지 보낸 후 연결 해제하기.
+        socket.emit('check', 'Error');
+      }
     });
     socket.on('clientIp', (data) => {
       console.log('client IP : ' + data);
