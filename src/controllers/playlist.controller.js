@@ -1,21 +1,29 @@
-const { playlistService } = require('../services');
+const { playlistService, groupService, songService } = require('../services');
 const { ConflictError } = require('../utils/errors');
 const { StatusCodes } = require('http-status-codes');
 
 const getPlaylistSong = async (req, res) => {
-  const playlistId = req.params.id;
+  // parameter로 선택한 groupId 전달
+  const groupId = req.params.id;
+  let playlistId = await groupService.findGroupPlaylist(groupId);
+  // console.log('===================');
+  // console.log(playlistId.playlist[0].id);
+  // console.log('===================');
+  playlistId = playlistId.playlist[0].id;
   if (!playlistId) {
     throw new ConflictError('존재하지 않는 플레이리스트 입니다.');
   }
   const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const socket = req.app.get('io');
-  console.log(socket.sockets.id);
-  const connectUser = req.app.get('connectUser');
+  const connectUser = req.app.get('connectUsers');
   socket.to(connectUser[clientIp]).emit('playlist', playlistId);
-
-  socket.emit('user', playlistId);
   const playlist = await playlistService.findPlaylistSong(playlistId);
+
+  if (!playlist || !playlist.song) {
+    return res.status(StatusCodes.OK).json([]);
+  }
   const songs = playlist.song;
+
   return res.status(StatusCodes.OK).json(songs);
 };
 

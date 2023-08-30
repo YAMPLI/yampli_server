@@ -1,5 +1,5 @@
 const express = require('express');
-const asyncWrap = require('../middlewares/async');
+const { asyncWrap } = require('../middlewares/async');
 const { playlistController } = require('../../controllers');
 const song = require('../../models/song.models');
 const playlist = require('../../models/playlist.model');
