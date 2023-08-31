@@ -6,9 +6,6 @@ const axios = require('axios');
 // const client_id = process.env.SPOTIFY_ID;
 // const client_secret = process.env.SPOTIFY_KEY;
 
-const client_id = '5cf3ec4d345d4783a93e023133186662';
-const client_secret = 'd8882a82f10149cfb238e3308c6becac';
-
 const tokenStore = {
   token: null,
   expiryTime: null,

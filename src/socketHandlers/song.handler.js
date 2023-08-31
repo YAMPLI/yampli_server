@@ -3,21 +3,22 @@ const { socketAsyncWrap } = require('../api/middlewares/async');
 const { getYoutubeVideoId } = require('../integrations/youtubeAPI');
 
 /**
+ * 아티스트와 노래 제목을 기반으로 Spotify 노래 데이터를 가져온다.
  *
  * @param {String} artist - 가수이름
  * @param {String} title  - 노래제목
  * @returns {Promise} - 스포티파이 노래 검색 결과를 반환하는 promise 객체
  */
 const getSpotifySongData = (artist, title) => {
-  const song = spotifyService.getSong(artist, title);
-  return song;
+  return spotifyService.getSong(artist, title);
 };
 
 /**
- * 전달받은 텍스트로 song 데이터 생성하는 소켓 핸들러
+ * 소켓을 통해 받은 텍스트로 song 데이터 생성
  *
  * @param {SocketIO.Socket} socket - 연결 소켓
  * @param {Object} userTextList - 저장된 노래 정보 [가수, 제목, 댓글, 태그]
+ * @param {Object} lastProcessedIndex - 처리된 데이터의 인덱스를 추적하는 객체
  * @param {Object} data - 클라이언트 소켓으로부터 전달받은 데이터
  */
 const handleTextEvent = async (socket, userTextList, lastProcessedIndex, data) => {
@@ -36,20 +37,25 @@ const handleTextEvent = async (socket, userTextList, lastProcessedIndex, data) =
   // 스포티파이 검색 결과 가져오기
   for (const sentence of newSentences) {
     const [artist, title, comment, tag] = sentence;
-    const song = await getSpotifySongData(artist, title);
-    const image = JSON.stringify(song.album.images);
-    const videoId = await getYoutubeVideoId(artist, title);
-    const songInfo = {
-      vidId: videoId,
-      url: `https://www.youtube.com/watch?v=${videoId}`,
-      title: song.name,
-      artist: song.artists[0].name,
-      thumb: image,
-      playlist: playlistId,
-    };
+
     try {
+      const song = await getSpotifySongData(artist, title);
+      // 썸네일로 사용할 이미지 url만 뽑아서 저장
+      const imageUrls = song.album.images.map((img) => img.url);
+      const videoId = await getYoutubeVideoId(artist, title);
+
+      const songInfo = {
+        vidId: videoId,
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+        title: song.name,
+        artist: song.artists[0].name,
+        thumb: imageUrls,
+        playlist: playlistId,
+      };
+
       const createSong = await songService.createSong(songInfo);
       await playlistService.addSongToPlaylist(playlistId, createSong._id);
+
       lastProcessedIndex[socketId] = startIndex + 1;
       startIndex++;
     } catch (err) {
@@ -63,8 +69,9 @@ const handleTextEvent = async (socket, userTextList, lastProcessedIndex, data) =
         if (!playlistWithSong) {
           await playlistService.addSongToPlaylist(playlistId, findSong._id);
         }
+      } else {
+        throw new Error('노래 데이터 db 저장 오류');
       }
-      throw new Error('노래 데이터 db 저장 오류');
       break;
     }
   }
