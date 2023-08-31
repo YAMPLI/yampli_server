@@ -175,5 +175,5 @@ dist
 .svelte-kit
 
 # 테스트 코드 제외
-.apiTest/
+apiTest/
 # End of https://www.toptal.com/developers/gitignore/api/macos,node
