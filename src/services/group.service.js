@@ -22,8 +22,9 @@ const findGroup = async (userInfo) => {
 };
 
 // 그룹이 관리하는 플레이리스트
-const findGroupPlaylist = async (userInfo) => {
-  return await Group.find({ user: userInfo }).populate('user');
+const findGroupPlaylist = async (groupId) => {
+  return await Group.findById(groupId).populate('playlist');
+  // return await Group.find({ user: userInfo }).populate('user');
 };
 
 module.exports = {

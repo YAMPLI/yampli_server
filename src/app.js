@@ -49,3 +49,5 @@ app.use(errorHandler);
 // 소켓연결
 const server = app.listen(port, () => console.log('server listening on port' + port));
 webSocket(server, app);
+
+module.exports = app;

@@ -23,15 +23,13 @@ const removeTimeInfo = (input) => {
   return input.replace(regex1, '').trim();
 };
 
-function processList(textData, usersData, socketId, app) {
+function processList(textData, userTextList, socketId) {
   try {
-    const socket = app.get('io');
-    let currentUserData = usersData[socketId];
-
+    let currentUserData = userTextList[socketId];
     // 처음 배열에는 아무 데이터가 존재하지 않기 때문에 undefined
     if (!Array.isArray(currentUserData)) {
       currentUserData = [];
-      usersData[socketId] = currentUserData; // userArray에 초기화된 배열을 할당
+      userTextList[socketId] = currentUserData; // userTextList에 원소가 없는 배열 currentUserData 할당
     }
     textData.map((list) => {
       list = list.trim();
@@ -47,8 +45,6 @@ function processList(textData, usersData, socketId, app) {
         }
       }
     });
-    socket.to(socketId).emit('check', socketId + ' ::: ' + currentUserData);
-
     return currentUserData;
   } catch (error) {
     throw new ConflictError('processList Error');

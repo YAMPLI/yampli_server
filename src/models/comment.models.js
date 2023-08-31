@@ -1,17 +1,61 @@
 const mongoose = require('mongoose');
 
-const commentSchema = mongoose.Schema({
-  content: { type: String, require: true },
-  playlist: { type: mongoose.Schema.Types.ObjectId, ref: 'Playlist' },
-  song: { type: mongoose.Schema.Types.ObjectId, ref: 'Song' },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' },
-  depth: { type: Number, default: 1 },
-  isDelete: { type: Boolean, default: 1 },
-  createAt: { type: Date, default: Date.now },
-  updateAt: { type: Date },
+const commentSchema = mongoose.Schema(
+  {
+    song: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Song',
+      require: true,
+    },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    playlist: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Playlist',
+    },
+    parentComment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment',
+    },
+    text: {
+      type: String,
+      required: true,
+    },
+    depth: {
+      type: Number,
+      default: 1,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedAt: {
+      type: Date,
+    },
+  },
+  { toObject: { virtuals: true }, toJSON: { virtuals: true } },
+);
+
+commentSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'parentComment',
 });
 
-const Comment = mongoose.model('Comment', commentSchema);
+commentSchema
+  .virtual('childComments')
+  .get(function () {
+    return this._childComments;
+  })
+  .set(function (v) {
+    this._childComments = v;
+  });
 
-module.exports = Comment;
+module.exports = mongoose.model('Comment', commentSchema);
