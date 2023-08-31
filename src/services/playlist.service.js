@@ -31,13 +31,18 @@ const addSongToPlaylist = async (playlistId, songId) => {
   );
 };
 
-// find -> 노래 정보 배열 , findOne -> 노래 정보 모두 출력
-const findPlaylistSong = async (playlistInfo) => {
-  return await Playlist.findOne({ _id: playlistInfo }).populate('song');
+/**
+ * 플레이리스트에 song이 포함되어 있는지 확인하기 위한 함수
+ * @param {String} playlistId - 플레이리스트 ID
+ * @param {String} songId - 노래 ID
+ * @returns {Promise} - 플레이리스트에 포함된 song을 반환하는 promise 객체
+ */
+const findPlaylistWithSong = async (playlistId, songId) => {
+  return await Playlist.findOne({ _id: playlistId, song: songId });
 };
 
 module.exports = {
   createPlaylist,
-  findPlaylistSong,
   addSongToPlaylist,
+  findPlaylistWithSong,
 };

@@ -6,7 +6,8 @@ module.exports = (server, app) => {
   // 소켓에 연결된 유저 정보 저장,
   // key : socket.id, value : userId
   const connectUsers = {};
-  const userTextList = {};
+  const userTextList = {}; // 전달받은 텍스트 데이터 저장
+  const lastProcessedIndex = {};
   const io = SocketIO(server, { path: '/socket.io' });
   // 라우터에서 req.app.get('io')로 호출 가능
   app.set('io', io);
@@ -50,7 +51,7 @@ module.exports = (server, app) => {
     //     socket.emit('check', 'Error');
     //   }
     // });
-    textHandler(socket, app, userTextList);
+    textHandler(socket, userTextList, lastProcessedIndex);
 
     socket.on('clientIp', (data) => {
       console.log('client IP : ' + data);

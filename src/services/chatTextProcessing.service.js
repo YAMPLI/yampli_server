@@ -26,7 +26,6 @@ const removeTimeInfo = (input) => {
 function processList(textData, userTextList, socketId) {
   try {
     let currentUserData = userTextList[socketId];
-    console.log('currentUserData  : ' + currentUserData);
     // 처음 배열에는 아무 데이터가 존재하지 않기 때문에 undefined
     if (!Array.isArray(currentUserData)) {
       currentUserData = [];
