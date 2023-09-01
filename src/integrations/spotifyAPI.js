@@ -1,22 +1,23 @@
+require('dotenv').config();
 const qs = require('qs');
 const axios = require('axios');
 
-const client_id = process.env.SPOTIFY_ID;
-const client_secret = process.env.SPOTIFY_KEY;
+const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_ID;
+const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_KEY;
 
 /**
- * 스포티파이 API를 사용하기 위한 토큰 발급 요청
- * @returns {object} { access_token: 토큰 정보, duration: 유효 시간 }
+ * 스포티파이 API 토큰 발급 요청하는 함수
+ *
+ * @returns {Object} { access_token: 토큰 정보, duration: 유효 시간 }
  */
-const getSpotifyToken = async () => {
+const fetchSpotifyToken = async () => {
   try {
-    const authHeader = 'Basic' + Buffer.from(`${client_id}:${client_secret}`).toString('base64');
     const response = await axios.post(
       'https://accounts.spotify.com/api/token',
       qs.stringify({ grant_type: 'client_credentials' }),
       {
         headers: {
-          Authorization: authHeader,
+          Authorization: 'Basic ' + new Buffer.from(SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).toString('base64'),
         },
       },
     );
@@ -27,12 +28,12 @@ const getSpotifyToken = async () => {
 };
 
 /**
- * 스포타피이에 저장된 노래 데이터 가져오기
+ * 스포타피이에서 노래 데이터를 가져오는 함수
  *
- * @param {String} artist - 가수이름
- * @param {String} title - 노래제목
+ * @param {String} artist - 가수 이름
+ * @param {String} title - 노래 제목
  * @param {String} token - 스포티파이 토큰
- * @returns {Object|null}
+ * @returns {Object|null} 노래 정보 객체 또는 null
  */
 const getSongBySpotify = async (artist, title, token) => {
   try {
@@ -58,6 +59,6 @@ const getSongBySpotify = async (artist, title, token) => {
 };
 
 module.exports = {
-  getSpotifyToken,
+  fetchSpotifyToken,
   getSongBySpotify,
 };

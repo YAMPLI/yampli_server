@@ -16,9 +16,6 @@ module.exports = (callbackURL) => {
       // 카카오 로그인 Redirect URI 경로
       // callbackURL: 'http://localhost:3000/kakao/oauth',
       callbackURL,
-      // callbackURL: 'http://example1.local:8080/kakao/oauth',
-      // callbackURL: `${clientURI}/kakao/oauth`,
-      // callbackURL: process.env.NGROK_URI + '/kakao/oauth',
     },
     /*
      * clientID에 카카오 앱 아이디 추가
@@ -32,7 +29,7 @@ module.exports = (callbackURL) => {
         // 카카오 플랫폼에서 로그인 했고 & snsId필드에 카카오 아이디가 일치할경우
         const exUser = await User.findOne({
           // User 모델에는 eamil 타입은 없고 userEamil이 존재
-          // 자\꾸 User 모델에 없는 email을 비교하려고 하니까 그냥 findOne해서 최상위 데이터 가져오고있었음.
+          // 자꾸 User 모델에 없는 email을 비교하려고 하니까 그냥 findOne해서 최상위 데이터 가져오고있었음.
           id: profile._json.id,
         });
         // 이미 가입된 카카오 프로필이면 성공

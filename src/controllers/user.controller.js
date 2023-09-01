@@ -1,5 +1,11 @@
 const { userService } = require('../services');
 
+/**
+ * 새로운 사용자 생성하는 함수
+ *
+ * @param {Object} req - Express 요청 객체
+ * @param {Object} res - Express 응답 객체
+ */
 const createUser = async (req, res) => {
   try {
     const user = await userService.createUser(req.body);
@@ -10,6 +16,12 @@ const createUser = async (req, res) => {
   }
 };
 
+/**
+ * 사용자 정보 가져오는 함수
+ *
+ * @param {Object} req - Express 요청 객체
+ * @param {Object} res - Express 응답 객체
+ */
 const getUsers = async (req, res) => {
   try {
     const user = await userService.getUserById(req.params.userId);
@@ -19,6 +31,12 @@ const getUsers = async (req, res) => {
   }
 };
 
+/**
+ * 사용자 정보 업데이트하는 함수
+ *
+ * @param {Object} req - Express 요청 객체
+ * @param {Object} res - Express 응답 객체
+ */
 const updateUser = async (req, res) => {
   try {
     const userId = req.params.userId;

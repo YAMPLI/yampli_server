@@ -14,6 +14,6 @@ router.use('/users', userRoute);
 router.use('/test', testRoute);
 // userAuth,
 router.use('/group', userAuth, groupRoute);
-router.use('/playlist', playlistRoute);
+router.use('/playlist', userAuth, playlistRoute);
 
 module.exports = router;

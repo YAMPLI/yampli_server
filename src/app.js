@@ -1,18 +1,18 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const route = require('./api/routes');
-const conn = require('./config/conn.js');
+const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
-const passport = require('passport');
-const passportConfig = require('./config/passport/passportConfig'); // 함수를 호출해서 모듈 객체를 가져옴
-const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const passport = require('passport');
 const webSocket = require('../socket');
 const errorHandler = require('./api/middlewares/errorHandler');
-const app = express();
+const route = require('./api/routes');
+const conn = require('./config/conn.js');
+const passportConfig = require('./config/passport/passportConfig');
 
+const app = express();
 const port = process.env.PORT || 8000;
 
 app.enable('trust proxy');
