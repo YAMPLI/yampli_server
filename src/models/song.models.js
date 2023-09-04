@@ -7,8 +7,9 @@ const songSchema = mongoose.Schema({
   title: { type: String, require: true },
   artist: { type: String, require: true },
   thumb: [{ type: String, require: true }],
+  tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
   playlist: [{ type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Playlist' }],
-  comment: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
 });
 
 // 미들웨어 추가

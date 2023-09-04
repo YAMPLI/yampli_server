@@ -39,43 +39,38 @@ const handleTextEvent = async (socket, userTextList, lastProcessedIndex, data) =
   // 스포티파이 검색 결과 가져오기
   for (const sentence of newSentences) {
     const [artist, title, comment, tag] = sentence;
-    let videoId;
     try {
-      const song = await getSpotifySongData(artist, title);
-      // 썸네일로 사용할 이미지 url만 뽑아서 저장
-      const imageUrls = song.album.images.map((img) => img.url);
-      videoId = await getYoutubeVideoId(artist, title);
+      // 이미 존재한 vidId를 갖는 song이 있는지 확인
+      let videoId = await getYoutubeVideoId(artist, title);
+      const findSongWithDB = await songService.findSongByVidId(videoId);
 
-      const songInfo = {
-        vidId: videoId,
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        title: song.name,
-        artist: song.artists[0].name,
-        thumb: imageUrls,
-        playlist: playlistId,
-      };
+      if (!findSongWithDB) {
+        const song = await getSpotifySongData(artist, title);
+        // 썸네일로 사용할 이미지 url만 뽑아서 저장
+        const imageUrls = song.album.images.map((img) => img.url);
 
-      const createSong = await songService.createSong(songInfo);
+        const songInfo = {
+          vidId: videoId,
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+          title: song.name,
+          artist: song.artists[0].name,
+          thumb: imageUrls,
+          playlist: playlistId,
+        };
 
-      await playlistService.addSongToPlaylist(playlistId, createSong._id);
-
+        const createSong = await songService.createSong(songInfo);
+        await playlistService.addSongToPlaylist(playlistId, createSong._id);
+      } else {
+        // 플레이리스트에 song이 이미 포함되었는지 확인
+        const playlistWithSong = await playlistService.findPlaylistWithSong(playlistId, findSongWithDB._id);
+        if (!playlistWithSong) {
+          await playlistService.addSongToPlaylist(playlistId, findSongWithDB._id);
+        }
+      }
       lastProcessedIndex[socketId] = startIndex + 1;
       startIndex++;
     } catch (err) {
-      if (err instanceof mongoose.Error.ValidationError || err.code === 11000 || err.code === 11001) {
-        // 이미 존재한 vidId를 갖는 song이 있는지 확인
-        const findSong = await songService.findSongByVidId(videoId);
-
-        // 플레이리스트에 song이 이미 포함되었는지 확인
-        const playlistWithSong = await playlistService.findPlaylistWithSong(playlistId, findSong._id);
-
-        if (!playlistWithSong) {
-          await playlistService.addSongToPlaylist(playlistId, findSong._id);
-        }
-      } else {
-        throw new Error('노래 데이터 db 저장 오류');
-      }
-      break;
+      throw new Error('노래 데이터 db 저장 오류');
     }
   }
 };

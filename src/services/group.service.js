@@ -52,7 +52,24 @@ const findGroupPlaylist = async (groupId) => {
   return await Group.findById(groupId).populate('playlist');
 };
 
+/**
+ * 노래를 플레이리스트에 추가하는 함수
+ *
+ * @param {String} groupId - 그룹 ID
+ * @param {String} playlistId - 플레이리스트 ID
+ * @returns {Promise} - 업데이트된 그룹을 반환하는 promise 객체
+ */
+const addPlaylistToGroup = async (groupId, playlistId) => {
+  return await Group.updateOne(
+    { _id: groupId },
+    {
+      $push: { playlist: playlistId },
+    },
+    { new: true }, // 업데이트된 문서 반한
+  );
+};
 module.exports = {
+  addPlaylistToGroup,
   createGroup,
   findGroupByUserInfo,
   findGroupByUser,

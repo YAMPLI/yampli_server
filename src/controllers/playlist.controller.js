@@ -14,7 +14,6 @@ const getPlaylistSong = async (req, res) => {
 
   // 그룹이 갖고 있는 플레이리스트
   const groupPlaylist = await groupService.findGroupPlaylist(groupId);
-
   // '?.' 문법을 사용해서, 이전 객체 요소 값이 null이나 undefined인 경우에도 에러를 발생시키지 않고 undefined를 반환하도록 한다.
   // 그래야 아래 playlistId 존재 유무를 비교해서 원하는 시나리오대로 진행 가능
   const playlistId = groupPlaylist?.playlist?.[0]?.id;
@@ -30,11 +29,10 @@ const getPlaylistSong = async (req, res) => {
 
   const playlist = await playlistService.findPlaylistSong(playlistId);
 
-  if (!playlist || !playlist.song) {
+  if (!playlist || !playlist.songs) {
     return res.status(StatusCodes.OK).json([]);
   }
-  const songs = playlist.song;
-
+  const songs = playlist.songs;
   return res.status(StatusCodes.OK).json(songs);
 };
 

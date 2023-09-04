@@ -22,7 +22,7 @@ const addSongToPlaylist = async (playlistId, songId) => {
   return await Playlist.updateOne(
     { _id: { $in: playlistId } },
     {
-      $push: { song: songId },
+      $push: { songs: songId },
     },
     { new: true }, // 업데이트된 문서 반한
   );
@@ -35,7 +35,7 @@ const addSongToPlaylist = async (playlistId, songId) => {
  * @returns {Promise} 플레이리스트에 포함된 노래를 반환하는 promise 객체
  */
 const findPlaylistSong = async (playlistId) => {
-  return await Playlist.findOne({ id: playlistId }).populate('song');
+  return await Playlist.findOne({ id: playlistId }).populate('songs');
 };
 
 /**
@@ -46,7 +46,7 @@ const findPlaylistSong = async (playlistId) => {
  * @returns {Promise} - 플레이리스트에 포함된 노래을 반환하는 promise 객체
  */
 const findPlaylistWithSong = async (playlistId, songId) => {
-  return await Playlist.findOne({ _id: playlistId, song: songId });
+  return await Playlist.findOne({ _id: playlistId, songs: songId });
 };
 
 module.exports = {

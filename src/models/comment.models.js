@@ -5,7 +5,7 @@ const commentSchema = mongoose.Schema(
     song: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Song',
-      require: true,
+      required: true,
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,

@@ -32,7 +32,8 @@ const createGroup = async (req, res) => {
     title: playlistTitle,
     group: newGroup.id,
   };
-  await playlistService.createPlaylist(playListInfo);
+  const newPlaylist = await playlistService.createPlaylist(playListInfo);
+  await groupService.addPlaylistToGroup(newGroup._id, newPlaylist._id);
 
   res.status(StatusCodes.OK);
 };
