@@ -23,7 +23,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 // origin -> ngrok 테스트 완료 후 CLIENT_HOST로 변경
-app.use(cors({ credentials: true, origin: process.env.NGROK_URI }));
+app.use(cors({ credentials: true, origin: process.env.NGINX_URI }));
+// app.use(cors());
 conn();
 // passportConfig();
 

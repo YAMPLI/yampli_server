@@ -25,6 +25,7 @@ module.exports = (callbackURL) => {
      */
     async (accessToken, refreshToken, profile, done) => {
       try {
+        console.log(profile);
         // console.log(profile._json.kakao_account.email);
         // 카카오 플랫폼에서 로그인 했고 & snsId필드에 카카오 아이디가 일치할경우
         const exUser = await User.findOne({
