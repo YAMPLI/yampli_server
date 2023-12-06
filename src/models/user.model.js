@@ -9,6 +9,9 @@ const userSchema = mongoose.Schema({
   img: { type: String },
   role: { type: String, default: 'Normal' },
   group: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
+  likedSongs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Song' }],
+  likedPlaylists: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Playlist' }],
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
 });
 
 const User = mongoose.model('User', userSchema);

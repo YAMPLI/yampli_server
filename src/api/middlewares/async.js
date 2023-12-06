@@ -19,12 +19,13 @@ const asyncWrap = (fn) => {
  * @param {String} errorMessage
  * @returns
  */
-const socketAsyncWrap = (socket, fn, errorMessage = '스포티파이 서버 오류') => {
+const socketAsyncWrap = (socket, fn, errorMessage) => {
   return async (data) => {
     try {
       await fn(socket, data);
     } catch (error) {
       console.error('스포티파이 소켓 통신 에러', error);
+      console.error(error.stack);
       socket.emit('error', { message: errorMessage });
     }
   };

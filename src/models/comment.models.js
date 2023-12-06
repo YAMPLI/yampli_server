@@ -5,7 +5,7 @@ const commentSchema = mongoose.Schema(
     song: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Song',
-      require: true,
+      required: true,
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
@@ -58,4 +58,6 @@ commentSchema
     this._childComments = v;
   });
 
-module.exports = mongoose.model('Comment', commentSchema);
+const Comment = mongoose.model('Comment', commentSchema);
+
+module.exports = Comment;
