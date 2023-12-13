@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { Like, Reply } = require('../models');
+const Like = require('./like.model');
+const Reply = require('./reply.model');
 
 const commentSchema = new mongoose.Schema({
   text: { type: String, required: true },

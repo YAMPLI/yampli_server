@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const { Comment, Like, Group, Reply } = require('../models');
+// const { Comment, Like, Group, Reply } = require('../models');
+const Comment = require('./comment.model');
+const Like = require('./like.model');
+const Group = require('./group.model');
+const Replay = require('./reply.model');
 
 const userSchema = mongoose.Schema({
   email: { type: String, required: true, lowercase: true, unique: true },

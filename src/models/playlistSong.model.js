@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
-const { Comment, Like, Playlist } = require('../models');
+// const { Comment, Like, Playlist } = require('../models');
+const Comment = require('./comment.model');
+const Like = require('./like.model');
+const Playlist = require('./playlist.model');
 
 const playlistSongSchema = mongoose.Schema({
   song: { type: mongoose.Schema.Types.ObjectId, ref: 'Song', required: true },

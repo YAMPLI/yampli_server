@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
-const { Playlist, Comment, Like, User } = require('../models');
+// const { Playlist, Comment, Like, User } = require('../models');
+const Playlist = require('./playlist.model');
+const Comment = require('./comment.model');
+const Like = require('./like.model');
+const User = require('./user.model');
 
 const groupSchema = mongoose.Schema({
   title: { type: String, required: true },

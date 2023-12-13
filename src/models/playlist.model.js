@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const { PlaylistSong } = require('../models');
+// const { PlaylistSong } = require('../models');
+const PlaylistSong = require('./playlistSong.model');
 
 const playlistSchema = mongoose.Schema({
   title: { type: String, required: true },

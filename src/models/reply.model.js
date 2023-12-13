@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const { Like } = require('../models');
+// const { Like } = require('../models');
+const Like = require('./like.model');
 
 const replySchema = new mongoose.Schema({
   text: { type: String, required: true },
