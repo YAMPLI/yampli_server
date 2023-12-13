@@ -1,6 +1,41 @@
 const { User } = require('../models');
 const jwt = require('jsonwebtoken');
+const xlsx = require('xlsx');
 
+/**
+ * 설계 변경 후 쿼리
+ */
+
+const createNickname = () => {
+  const ad = xlsx.readFile('../data/ad.xlsx');
+  const animals = xlsx.readFile('../data/animals.xlsx');
+
+  const sheetName1 = ad.SheetNames[0];
+  const sheetName2 = animals.SheetNames[0];
+
+  const sheet1 = ad.Sheets[sheetName1];
+  const sheet2 = animals.Sheets[sheetName2];
+
+  const data = xlsx.utils.sheet_to_json(sheet1);
+
+  console.log(data);
+};
+
+/**
+ *
+ * @param {Object} userData
+ * @returns {Promise<User>}
+ */
+const createUserEmail = async (userData) => {
+  const user = new User(userData);
+  await user.save();
+  return user;
+};
+
+/**
+ * 설계 변경 전 쿼리 모음
+ * (추후 삭제 혹은 수정)
+ */
 /**
  * 사용자 생성
  * @param {Object} userBody
@@ -64,4 +99,5 @@ module.exports = {
   updateUserById,
   createJWT,
   findUserGroup,
+  createNickname,
 };

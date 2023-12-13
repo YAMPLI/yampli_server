@@ -1,6 +1,22 @@
 const { userService } = require('../services');
 
 /**
+ * 설계 변경 후 컨트롤러
+ */
+
+const createNickname = async (req, res) => {
+  try {
+    const nickname = await userService.createNickname();
+  } catch (err) {
+    console.log();
+  }
+};
+
+/**
+ * 설계 변경 전 컨트롤러
+ *
+ */
+/**
  * 새로운 사용자 생성하는 함수
  *
  * @param {Object} req - Express 요청 객체
@@ -51,4 +67,5 @@ module.exports = {
   createUser,
   getUsers,
   updateUser,
+  createNickname,
 };

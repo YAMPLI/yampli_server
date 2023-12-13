@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const { Comment, Like, Group, Reply } = reqire('../models');
+const { Comment, Like, Group, Reply } = require('../models');
 
 const userSchema = mongoose.Schema({
   email: { type: String, required: true, lowercase: true, unique: true },
@@ -9,6 +9,7 @@ const userSchema = mongoose.Schema({
   kakaoId: { type: String, required: true, unique: true },
   createdAt: { type: Date, default: Date.now }, // 작성 시간을 저장하는 필드 추가
   isActive: { type: Boolean, default: 1 },
+  emailAuth: { type: Boolean, default: false },
   img: { type: String },
   role: { type: String, default: 'Normal' },
   groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
