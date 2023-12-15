@@ -1,5 +1,6 @@
 const { User, Comment, Like, Group, Reply } = require('../models');
 const { ConflictError, CustomApiError } = require('../utils/errors');
+const { sendAuthMail } = require('../config/email');
 const jwt = require('jsonwebtoken');
 const xlsx = require('xlsx');
 const path = require('path'); // 엑셀 가져올 때 절대 경로로 가져오기 위한 모듈
@@ -62,13 +63,13 @@ const createNickname = () => {
   do {
     const adTitle = getRandomDataFromJson(ad);
     const animalTitle = getRandomDataFromJson(animals);
-    const randomNum = Math.floor(Math.random() * 2);
+    const randomNum = Math.floor(Math.random() * 99999);
     nickname = `${adTitle} ${animalTitle}${randomNum}`;
     flag += 1;
     if (flag == 999999) {
       throw new CustomApiError('잠시 후 다시 접속해주세요.');
     }
-  } while (findNickname(nickname)); // 중복 아닐 때 까지 반복
+  } while (!findNickname(nickname)); // 중복 아닐 때 까지 반복
   return nickname;
 };
 /**
@@ -87,27 +88,35 @@ const findNickname = async (nickname) => {
  * @returns {Promise<User>}
  */
 const createUserEmail = async (userData) => {
-  const { email, password } = userData;
-  const getUser = await findUserByEmail(email);
-
-  if (getUser) {
-    const authState = await emailAuthCheck(getUser);
-    if (authState) {
-      throw new ConflictError('이미 가입된 이메일입니다.');
+  try {
+    const { email, password } = userData;
+    const getUser = await findUserByEmail(email);
+    let user;
+    if (getUser) {
+      const authState = await emailAuthCheck(getUser);
+      if (authState) {
+        throw new ConflictError('이미 가입된 이메일입니다.');
+      }
+      // 이미 유저가 등록되었고, 인증만 완료되지 않는 상태인 경우
+      getUser.password = password;
+      getUser.nickname = createNickname();
+      user = await getUser.save();
+    } else {
+      // 신규 가입
+      user = await User.create({
+        email: email,
+        password: password,
+        nickname: createNickname(),
+      });
     }
+    const token = createJWT(email);
+    const verificationLink = `${process.env.SERVER_URL}/auth/verify-email?token=${token}`;
+    await sendAuthMail(email, verificationLink);
 
-    getUser.password = password;
-    getUser.nickname = createNickname();
-    await getUser.save();
-    return getUser;
+    return user;
+  } catch (e) {
+    throw e;
   }
-  const user = User.create({
-    email: email,
-    password: password,
-    nickname: createNickname(),
-  });
-
-  return user;
 };
 
 /**
@@ -128,6 +137,33 @@ const findUserByEmail = async (email) => {
 const emailAuthCheck = async (user) => {
   const authState = user.emailAuth;
   return authState;
+};
+
+/**
+ * JWT 생성
+ * @param {Object|String} userInfo
+ * @returns {string} 생성된 JWT 토큰
+ */
+const createJWT = (userInfo) => {
+  if (typeof userInfo === 'object') {
+    return jwt.sign(
+      {
+        userId: userInfo.id,
+        userEmail: userInfo.userEmail,
+        userNickname: userInfo.uerNickname,
+      },
+      process.env.JWT_SECRET,
+    );
+  } else if (typeof userInfo === 'string') {
+    return jwt.sign(
+      {
+        userEmail: userInfo,
+      },
+      process.env.JWT_SECRET,
+    );
+  } else {
+    throw new ConflictError('입력하신 정보를 다시 확인해주세요.');
+  }
 };
 
 /**
@@ -175,22 +211,6 @@ const updateUserById = async (userId, userData) => {
   Object.assign(user, userData);
   await user.save();
   return user;
-};
-
-/**
- * JWT 생성
- * @param {Object} userInfo
- * @returns {string} 생성된 JWT 토큰
- */
-const createJWT = (userInfo) => {
-  return jwt.sign(
-    {
-      userId: userInfo.id,
-      userEmail: userInfo.userEmail,
-      userNickname: userInfo.uerNickname,
-    },
-    process.env.JWT_SECRET,
-  );
 };
 
 /**

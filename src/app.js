@@ -27,7 +27,6 @@ app.use(cors({ credentials: true, origin: process.env.NGINX_URI }));
 // app.use(cors());
 conn();
 // passportConfig();
-
 app.use(
   session({
     cookie: { maxAge: 86400000, secure: false },
