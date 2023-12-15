@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const Comment = require('./comment.model');
 const Like = require('./like.model');
 const Group = require('./group.model');
-const Replay = require('./reply.model');
+const Reply = require('./reply.model');
 
 const userSchema = mongoose.Schema({
   email: { type: String, required: true, lowercase: true, unique: true },
@@ -37,16 +37,6 @@ userSchema.pre('save', async function (next) {
   if (user.isModified('password')) {
     user.password = await bcrypt.hash(user.password, 8);
   }
-  next();
-});
-
-// User 스키마 (user.js)
-userSchema.pre('remove', async function (next) {
-  const userId = this._id;
-  await Comment.deleteMany({ author: userId });
-  await Like.deleteMany({ user: userId });
-  await Group.updateMany({}, { $pull: { users: userId } });
-  await Reply.deleteMany({ author: userId });
   next();
 });
 

@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-const { Like, Reply } = require('../models');
-const Like = require('./like.model');
-const Reply = require('./reply.model');
 
 const commentSchema = new mongoose.Schema({
   text: { type: String, required: true },
@@ -17,12 +14,6 @@ const commentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PlaylistSong',
   }, // 특정 플레이리스트 노래에 대한 댓글 조회하기 기능에 사용되는 필터링 로직을 구현하기 위한 필드
-});
-
-commentSchema.pre('remove', async function (next) {
-  await Like.deleteMany({ target: this._id, targetType: 'Comment' });
-  await Reply.deleteMany({ parentComment: this._id }); // 대댓글 삭제
-  next();
 });
 
 const Comment = mongoose.model('Comment', commentSchema);

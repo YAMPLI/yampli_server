@@ -1,24 +1,67 @@
-const { User } = require('../models');
+const { User, Comment, Like, Group, Reply } = require('../models');
 const jwt = require('jsonwebtoken');
 const xlsx = require('xlsx');
+const path = require('path'); // 엑셀 가져올 때 절대 경로로 가져오기 위한 모듈
 
 /**
  * 설계 변경 후 쿼리
  */
 
+/**
+ * 상대경로를 절대경로로 변경
+ * @param {String} xlsPath
+ * @returns {String} 절대경로
+ */
+const createFilePath = (xlsPath) => {
+  const filePath = path.join(__dirname, xlsPath);
+  return filePath;
+};
+
+/**
+ * 엑셀 0번 시트 데이터 읽어오기
+ * @param {String} filePath
+ * @returns {Object} Json 타입으로 변경된 엑셀 데이터
+ */
+const excelToJson = (filePath) => {
+  // 엑셀 읽기
+  const workbook = xlsx.readFile(filePath);
+  // 0번째 시트 이름 가져오기
+  const sheetName = workbook.SheetNames[0];
+  // 시트 데이터 가져오기
+  const worksheet = workbook.Sheets[sheetName];
+  // Json 변환
+  const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+  return jsonData;
+};
+
+/**
+ * 무작위 엑셀 데이터 추출
+ * @param {Object} jsonData
+ * @returns {String}
+ */
+const getRandomDataFromJson = (jsonData) => {
+  const dataSize = jsonData.length;
+  const randomIndex = Math.floor(Math.random() * dataSize);
+  const title = jsonData[randomIndex].Title;
+
+  return title;
+};
+
+/**
+ * 형용사 + 동물이름 닉네임 생성
+ * @returns {String}
+ */
 const createNickname = () => {
-  const ad = xlsx.readFile('../data/ad.xlsx');
-  const animals = xlsx.readFile('../data/animals.xlsx');
+  const ad = excelToJson(createFilePath('../data/ad.xlsx'));
+  const animals = excelToJson(createFilePath('../data/animals.xlsx'));
 
-  const sheetName1 = ad.SheetNames[0];
-  const sheetName2 = animals.SheetNames[0];
+  const adTitle = getRandomDataFromJson(ad);
+  const animalTitle = getRandomDataFromJson(animals);
 
-  const sheet1 = ad.Sheets[sheetName1];
-  const sheet2 = animals.Sheets[sheetName2];
+  const nickname = `${adTitle} ${animalTitle}`;
 
-  const data = xlsx.utils.sheet_to_json(sheet1);
-
-  console.log(data);
+  return nickname;
 };
 
 /**
@@ -32,6 +75,17 @@ const createUserEmail = async (userData) => {
   return user;
 };
 
+/**
+ * User 데이터 및 연관 데이터 삭제
+ * @param {String} userId
+ */
+const deleteUserAndRelatedData = async (userId) => {
+  await Comment.deleteMany({ author: userId });
+  await Like.deleteMany({ user: userId });
+  await Group.updateMany({}, { $pull: { users: userId } });
+  await Reply.deleteMany({ author: userId });
+  await User.findOneAndDelete(userId);
+};
 /**
  * 설계 변경 전 쿼리 모음
  * (추후 삭제 혹은 수정)
@@ -100,4 +154,5 @@ module.exports = {
   createJWT,
   findUserGroup,
   createNickname,
+  deleteUserAndRelatedData,
 };

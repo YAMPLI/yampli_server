@@ -28,28 +28,6 @@ songSchema.methods.updateTagUsage = async function () {
   }
 };
 
-songSchema.pre('remove', async function (next) {
-  const songId = this._id;
-
-  // 노래에 직접 달린 댓글과 PlaylistSong과 관련된 댓글 삭제
-  await Comment.deleteMany({ song: songId });
-  await Comment.deleteMany({ source: songId });
-
-  // 노래와 관련된 좋아요 삭제
-  await Like.deleteMany({ target: songId, targetType: 'Song' });
-
-  // 연결된 PlaylistSong 삭제
-  await PlaylistSong.deleteMany({ song: songId });
-
-  // 태그 사용 횟수 업데이트
-  const songTags = this.tags;
-  for (const tagId of songTags) {
-    await TagUsage.findOneAndUpdate({ tag: tagId }, { $inc: { count: -1 } }, { upsert: true });
-  }
-
-  next();
-});
-
 const Song = mongoose.model('Song', songSchema);
 
 module.exports = Song;

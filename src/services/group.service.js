@@ -1,4 +1,24 @@
-const { Group } = require('../models');
+const { Group, Playlist, Comment, Like, User } = require('../models');
+
+/**
+ * 수정 후
+ */
+
+/**
+ * 그룹 및 연관데이터 삭제
+ * @param {String} groupId
+ */
+const deleteGroupAndRelatedData = async (groupId) => {
+  await Playlist.find({ group: groupId }).then((playlists) => playlists.forEach((playlist) => playlist.remove()));
+  await Comment.deleteMany({ group: groupId });
+  await Like.deleteMany({ target: groupId, targetType: 'Group' });
+  await User.updateMany({}, { $pull: { groups: groupId } });
+  await Group.findOneAndDelete(groupId);
+};
+
+/**
+ * 모델 수정 전
+ */
 
 /**
  * 새로운 그룹을 생성하는 함수
@@ -75,4 +95,5 @@ module.exports = {
   findGroupByUser,
   findGroupByTitleAndUser,
   findGroupPlaylist,
+  deleteGroupAndRelatedData,
 };
