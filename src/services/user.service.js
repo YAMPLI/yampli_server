@@ -1,4 +1,5 @@
 const { User, Comment, Like, Group, Reply } = require('../models');
+const { ConflictError } = require('../utils/errors');
 const jwt = require('jsonwebtoken');
 const xlsx = require('xlsx');
 const path = require('path'); // 엑셀 가져올 때 절대 경로로 가져오기 위한 모듈
@@ -65,14 +66,51 @@ const createNickname = () => {
 };
 
 /**
- *
+ * 유저 생성
  * @param {Object} userData
  * @returns {Promise<User>}
  */
 const createUserEmail = async (userData) => {
-  const user = new User(userData);
+  const { email, password } = userData;
+  const getUser = await findUserByEmail(email);
+
+  if (getUser) {
+    const authState = await emailAuthCheck(getUser);
+    if (authState) {
+      throw new ConflictError('이미 가입된 이메일입니다.');
+    }
+    getUser.password = password;
+    getUser.nickname = createNickname();
+    await getUser.save();
+    return getUser;
+  }
+  const user = User.create({
+    email: email,
+    password: password,
+    nickname: createNickname(),
+  });
   await user.save();
   return user;
+};
+
+/**
+ * 이메일로 가입된 유저 찾기
+ * @param {String} email
+ * @returns {Promise<User>}
+ */
+const findUserByEmail = async (email) => {
+  const user = await User.findOne({ email: email });
+  return user;
+};
+
+/**
+ * 이메일 인증 확인
+ * @param {Object<User>} user
+ * @returns
+ */
+const emailAuthCheck = async (user) => {
+  const authState = user.emailAuth;
+  return authState;
 };
 
 /**
@@ -155,4 +193,5 @@ module.exports = {
   findUserGroup,
   createNickname,
   deleteUserAndRelatedData,
+  createUserEmail,
 };

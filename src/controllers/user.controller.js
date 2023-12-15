@@ -1,15 +1,30 @@
 const { userService } = require('../services');
+const { StatusCodes } = require('http-status-codes');
 
 /**
  * 설계 변경 후 컨트롤러
  */
 
+const createUserByEmail = async (req, res) => {
+  try {
+    const createUser = await userService.createUserEmail(req.body);
+    res.json({ data: createUser });
+  } catch (e) {
+    throw e;
+  }
+};
 const createNickname = async (req, res) => {
   try {
     const nickname = await userService.createNickname();
+    res.json({ data: nickname });
   } catch (err) {
     console.log();
   }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+  } catch (err) {}
 };
 
 /**
@@ -68,4 +83,5 @@ module.exports = {
   getUsers,
   updateUser,
   createNickname,
+  createUserByEmail,
 };
