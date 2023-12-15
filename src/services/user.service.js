@@ -1,5 +1,5 @@
 const { User, Comment, Like, Group, Reply } = require('../models');
-const { ConflictError } = require('../utils/errors');
+const { ConflictError, CustomApiError } = require('../utils/errors');
 const jwt = require('jsonwebtoken');
 const xlsx = require('xlsx');
 const path = require('path'); // 엑셀 가져올 때 절대 경로로 가져오기 위한 모듈
@@ -57,12 +57,28 @@ const createNickname = () => {
   const ad = excelToJson(createFilePath('../data/ad.xlsx'));
   const animals = excelToJson(createFilePath('../data/animals.xlsx'));
 
-  const adTitle = getRandomDataFromJson(ad);
-  const animalTitle = getRandomDataFromJson(animals);
-
-  const nickname = `${adTitle} ${animalTitle}`;
-
+  let nickname;
+  let flag = 0;
+  do {
+    const adTitle = getRandomDataFromJson(ad);
+    const animalTitle = getRandomDataFromJson(animals);
+    const randomNum = Math.floor(Math.random() * 2);
+    nickname = `${adTitle} ${animalTitle}${randomNum}`;
+    flag += 1;
+    if (flag == 999999) {
+      throw new CustomApiError('잠시 후 다시 접속해주세요.');
+    }
+  } while (findNickname(nickname)); // 중복 아닐 때 까지 반복
   return nickname;
+};
+/**
+ * 중복 닉네임 찾기
+ * @param {String} nickname
+ * @returns {Boolean}
+ */
+const findNickname = async (nickname) => {
+  const user = await User.findOne({ nickname: nickname });
+  return !user;
 };
 
 /**
@@ -79,6 +95,7 @@ const createUserEmail = async (userData) => {
     if (authState) {
       throw new ConflictError('이미 가입된 이메일입니다.');
     }
+
     getUser.password = password;
     getUser.nickname = createNickname();
     await getUser.save();
@@ -89,7 +106,7 @@ const createUserEmail = async (userData) => {
     password: password,
     nickname: createNickname(),
   });
-  await user.save();
+
   return user;
 };
 

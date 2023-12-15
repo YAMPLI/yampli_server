@@ -1,20 +1,15 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-// const { Comment, Like, Group, Reply } = require('../models');
-const Comment = require('./comment.model');
-const Like = require('./like.model');
-const Group = require('./group.model');
-const Reply = require('./reply.model');
 
 const userSchema = mongoose.Schema({
   email: { type: String, required: true, lowercase: true, unique: true },
   password: { type: String, required: true },
   nickname: { type: String, minLength: 1, maxLength: 100, required: true },
-  kakaoId: { type: String, required: true, unique: true },
+  kakaoId: { type: String, unique: true, sparse: true }, // sparse : 유니크 필드 null 중복 허용
   createdAt: { type: Date, default: Date.now }, // 작성 시간을 저장하는 필드 추가
-  isActive: { type: Boolean, default: 1 },
+  isActive: { type: Boolean, default: true },
   emailAuth: { type: Boolean, default: false },
-  img: { type: String },
+  img: { type: String, default: '../config/images/profile.png' },
   role: { type: String, default: 'Normal' },
   groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
   likedGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
