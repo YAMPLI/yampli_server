@@ -1,6 +1,12 @@
 const nodemailer = require('nodemailer');
 const { CustomApiError } = require('../utils/errors');
-
+const STRINGS = require('../constants/strings');
+/**
+ * 유저 데이터 생성 후 인증 이메일 전송
+ * @param {String} email 가입유저이메일
+ * @param {String} link 인증링크
+ * @returns {Promise}
+ */
 const sendAuthMail = (email, link) => {
   return new Promise((resolve, reject) => {
     const smtpTransport = nodemailer.createTransport({
@@ -30,7 +36,7 @@ const sendAuthMail = (email, link) => {
     smtpTransport.sendMail(option, (err, info) => {
       smtpTransport.close();
       if (err) {
-        reject(new CustomApiError('메일전송오류'));
+        reject(new CustomApiError(STRINGS.ALERT.AUTH_MAIL_RES_ERR));
       } else {
         resolve(true);
       }

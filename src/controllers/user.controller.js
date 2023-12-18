@@ -8,7 +8,7 @@ const { StatusCodes } = require('http-status-codes');
 const createUserByEmail = async (req, res) => {
   try {
     const createUser = await userService.createUserEmail(req.body);
-    res.json({ data: createUser });
+    res.status(StatusCodes.OK).json({ data: true, message: '' });
   } catch (e) {
     throw e;
   }

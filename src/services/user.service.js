@@ -1,6 +1,7 @@
 const { User, Comment, Like, Group, Reply } = require('../models');
 const { ConflictError, CustomApiError } = require('../utils/errors');
 const { sendAuthMail } = require('../config/email');
+const STRINGS = require('../constants/strings');
 const jwt = require('jsonwebtoken');
 const xlsx = require('xlsx');
 const path = require('path'); // 엑셀 가져올 때 절대 경로로 가져오기 위한 모듈
@@ -67,7 +68,7 @@ const createNickname = () => {
     nickname = `${adTitle} ${animalTitle}${randomNum}`;
     flag += 1;
     if (flag == 999999) {
-      throw new CustomApiError('잠시 후 다시 접속해주세요.');
+      throw new CustomApiError(STRINGS.ALERT.RETRY_REQ);
     }
   } while (!findNickname(nickname)); // 중복 아닐 때 까지 반복
   return nickname;
@@ -95,7 +96,7 @@ const createUserEmail = async (userData) => {
     if (getUser) {
       const authState = await emailAuthCheck(getUser);
       if (authState) {
-        throw new ConflictError('이미 가입된 이메일입니다.');
+        throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
       }
       // 이미 유저가 등록되었고, 인증만 완료되지 않는 상태인 경우
       getUser.password = password;
@@ -113,7 +114,7 @@ const createUserEmail = async (userData) => {
     const verificationLink = `${process.env.SERVER_URL}/auth/verify-email?token=${token}`;
     await sendAuthMail(email, verificationLink);
 
-    return user;
+    return false;
   } catch (e) {
     throw e;
   }
@@ -162,7 +163,7 @@ const createJWT = (userInfo) => {
       process.env.JWT_SECRET,
     );
   } else {
-    throw new ConflictError('입력하신 정보를 다시 확인해주세요.');
+    throw new ConflictError(STRINGS.ALERT.CHECK_INPUT_DATA);
   }
 };
 

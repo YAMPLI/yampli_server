@@ -9,7 +9,10 @@ const userSchema = mongoose.Schema({
   createdAt: { type: Date, default: Date.now }, // 작성 시간을 저장하는 필드 추가
   isActive: { type: Boolean, default: true },
   emailAuth: { type: Boolean, default: false },
-  img: { type: String, default: '../config/images/profile.png' },
+  img: {
+    type: String,
+    default: `${process.env.DIRECTORY_IMG}/Users/hanjeongseol/Documents/YAMPLI/yampli_server/src/config/images/profile.png`,
+  },
   role: { type: String, default: 'Normal' },
   groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
   likedGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
