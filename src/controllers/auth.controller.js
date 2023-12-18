@@ -114,6 +114,12 @@ const kakaoLoginCallback = async (req, res, next) => {
   // };
 };
 
+const authEmail = async (req, res) => {
+  const params = await userService.verifyJWT(req.url);
+  console.log(res.config);
+  res.status(200).json({ data: params });
+};
 module.exports = {
   kakaoLoginCallback,
+  authEmail,
 };

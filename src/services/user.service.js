@@ -1,6 +1,7 @@
 const { User, Comment, Like, Group, Reply } = require('../models');
-const { ConflictError, CustomApiError } = require('../utils/errors');
+const { ConflictError, CustomApiError, UnauthenticatedError, ForbiddenError } = require('../utils/errors');
 const { sendAuthMail } = require('../config/email');
+const { extractQueryParams } = require('../api/middlewares/queryStringExtractor');
 const STRINGS = require('../constants/strings');
 const jwt = require('jsonwebtoken');
 const xlsx = require('xlsx');
@@ -111,12 +112,12 @@ const createUserEmail = async (userData) => {
       });
     }
     const token = createJWT(email);
-    const verificationLink = `${process.env.SERVER_URL}/auth/verify-email?token=${token}`;
+    const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
     await sendAuthMail(email, verificationLink);
 
     return false;
-  } catch (e) {
-    throw e;
+  } catch (err) {
+    throw err;
   }
 };
 
@@ -161,9 +162,29 @@ const createJWT = (userInfo) => {
         userEmail: userInfo,
       },
       process.env.JWT_SECRET,
+      { expiresIn: '10m' },
     );
   } else {
     throw new ConflictError(STRINGS.ALERT.CHECK_INPUT_DATA);
+  }
+};
+
+const verifyJWT = async (url) => {
+  const queryParams = extractQueryParams(url).token;
+  try {
+    const decoded = jwt.verify(queryParams, process.env.JWT_SECRET);
+    const email = decoded.userEmail;
+    const user = await findUserByEmail(email);
+    const authStatus = await emailAuthCheck(user);
+    if (!authStatus) {
+      user.emailAuth = !user.emailAuth;
+      const updateUser = await user.save();
+      return updateUser;
+    } else {
+      throw new ForbiddenError('만료된 페이지입니다.');
+    }
+  } catch (err) {
+    throw new UnauthenticatedError('회원 가입을 다시 진행해주세요.', true);
   }
 };
 
@@ -232,4 +253,5 @@ module.exports = {
   createNickname,
   deleteUserAndRelatedData,
   createUserEmail,
+  verifyJWT,
 };
