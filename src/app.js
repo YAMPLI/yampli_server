@@ -10,6 +10,7 @@ const webSocket = require('../socket');
 const errorHandler = require('./api/middlewares/errorHandler');
 const route = require('./api/routes');
 const conn = require('./config/conn.js');
+const { createRedisClient } = require('./config/redisClient.js');
 const passportConfig = require('./config/passport/passportConfig');
 
 const app = express();
@@ -26,8 +27,8 @@ app.use(cookieParser());
 app.use(cors({ credentials: true, origin: process.env.NGINX_URI }));
 // app.use(cors());
 conn();
+createRedisClient();
 // passportConfig();
-
 app.use(
   session({
     cookie: { maxAge: 86400000, secure: false },

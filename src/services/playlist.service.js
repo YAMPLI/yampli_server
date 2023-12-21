@@ -1,4 +1,21 @@
-const { Playlist } = require('../models');
+const { Playlist, PlaylistSong } = require('../models');
+
+/**
+ * 수정 후
+ */
+
+/**
+ * 플레이리스트 및 연관 데이터 삭제
+ * @param {String} playlistId
+ */
+const deleteGroupAndRelatedData = async (playlistId) => {
+  await PlaylistSong.deleteMany({ playlist: playlistId });
+  await Playlist.findOneAndDelete(playlistId);
+};
+
+/**
+ * 수정 전
+ */
 
 /**
  * 새로운 플레이리스트을 생성하는 함수
@@ -54,4 +71,5 @@ module.exports = {
   addSongToPlaylist,
   findPlaylistWithSong,
   findPlaylistSong,
+  deleteGroupAndRelatedData,
 };

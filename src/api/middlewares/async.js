@@ -8,6 +8,7 @@ const asyncWrap = (fn) => {
     try {
       return await fn(req, res, next);
     } catch (error) {
+      console.log('zoclzocl');
       return next(error);
     }
   };

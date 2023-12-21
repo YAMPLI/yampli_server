@@ -1,15 +1,18 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const { Comment, Like, Group, Reply } = reqire('../models');
 
 const userSchema = mongoose.Schema({
   email: { type: String, required: true, lowercase: true, unique: true },
   password: { type: String, required: true },
   nickname: { type: String, minLength: 1, maxLength: 100, required: true },
-  kakaoId: { type: String, required: true, unique: true },
+  kakaoId: { type: String, unique: true, sparse: true }, // sparse : 유니크 필드 null 중복 허용
   createdAt: { type: Date, default: Date.now }, // 작성 시간을 저장하는 필드 추가
-  isActive: { type: Boolean, default: 1 },
-  img: { type: String },
+  isActive: { type: Boolean, default: true },
+  emailAuth: { type: Boolean, default: false },
+  img: {
+    type: String,
+    default: `${process.env.DIRECTORY_IMG}/Users/hanjeongseol/Documents/YAMPLI/yampli_server/src/config/images/profile.png`,
+  },
   role: { type: String, default: 'Normal' },
   groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
   likedGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
@@ -32,16 +35,6 @@ userSchema.pre('save', async function (next) {
   if (user.isModified('password')) {
     user.password = await bcrypt.hash(user.password, 8);
   }
-  next();
-});
-
-// User 스키마 (user.js)
-userSchema.pre('remove', async function (next) {
-  const userId = this._id;
-  await Comment.deleteMany({ author: userId });
-  await Like.deleteMany({ user: userId });
-  await Group.updateMany({}, { $pull: { users: userId } });
-  await Reply.deleteMany({ author: userId });
   next();
 });
 

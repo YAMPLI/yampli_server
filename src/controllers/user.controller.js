@@ -1,5 +1,36 @@
-const { userService } = require('../services');
+const { userService, authService } = require('../services');
+const { sendResponse } = require('../utils/responses/responseHandler');
+const { StatusCodes } = require('http-status-codes');
 
+/**
+ * 설계 변경 후 컨트롤러
+ */
+
+/**
+ * Email 계정 생성
+ *
+ * @param {Object} req - Express 요청 객체
+ * @param {Object} res - Express 응답 객체
+ */
+const createUserByEmail = async (req, res) => {
+  try {
+    const createUser = await userService.createUserEmail(req.body);
+    sendResponse(res, StatusCodes.OK, {}, '가입이 완료되었습니다. 가입하신 메일을 확인하여 인증을 진행해주세요.');
+    res.status(StatusCodes.OK).json({ data: true, message: '' });
+  } catch (err) {
+    throw err;
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+  } catch (err) {}
+};
+
+/**
+ * 설계 변경 전 컨트롤러
+ *
+ */
 /**
  * 새로운 사용자 생성하는 함수
  *
@@ -51,4 +82,5 @@ module.exports = {
   createUser,
   getUsers,
   updateUser,
+  createUserByEmail,
 };
