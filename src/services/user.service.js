@@ -2,7 +2,7 @@ const { User, Comment, Like, Group, Reply } = require('../models');
 const { ConflictError, CustomApiError, UnauthenticatedError, ForbiddenError } = require('../utils/errors');
 const { sendAuthMail } = require('../config/email');
 const { extractQueryParams } = require('../api/middlewares/queryStringExtractor');
-const { clientConnect, disconnect, getData, setData, selectDataBase, delData } = require('../config/redisClient');
+const redisClient = require('../config/redisClient');
 const STRINGS = require('../constants/strings');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -93,43 +93,36 @@ const findNickname = async (nickname) => {
  * @returns {Promise<User>}
  */
 const createUserEmail = async (userData) => {
-  try {
-    const { email, password } = userData;
-    const getUser = await findUserByEmail(email);
-    let user;
-    if (getUser) {
-      const authState = await emailAuthCheck(getUser);
-      if (authState) {
-        throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
-      }
-      // 이미 유저가 등록되었고, 인증만 완료되지 않는 상태인 경우
-      getUser.password = password;
-      getUser.nickname = createNickname();
-      user = await getUser.save();
-    } else {
-      // 신규 가입
-      user = await User.create({
-        email: email,
-        password: password,
-        nickname: createNickname(),
-      });
-    }
-
-    // 일회용 토큰 생성
-    const token = crypto.randomBytes(32).toString('hex');
-
-    await clientConnect();
-    await selectDataBase(0);
-    await setData(token, email, 3600);
-    await disconnect();
-
-    const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
-    await sendAuthMail(email, verificationLink);
-
-    return false;
-  } catch (err) {
-    throw err;
+  const { email, password } = userData;
+  const getUser = await findUserByEmail(email);
+  let user;
+  if (getUser && (await emailAuthCheck(getUser))) {
+    throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
   }
+  if (getUser) {
+    getUser.password = password;
+    getUser.nickname = createNickname();
+    user = await getUser.save();
+  } else {
+    user = await User.create({
+      email: email,
+      password: password,
+      nickname: createNickname(),
+    });
+  }
+
+  // 일회용 토큰 생성
+  const token = crypto.randomBytes(32).toString('hex');
+
+  await redisClient.clientConnect();
+  await redisClient.selectDataBase(0);
+  await redisClient.setData(token, email, 3600);
+  await redisClient.disconnect();
+
+  const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
+  await sendAuthMail(email, verificationLink);
+
+  return true;
 };
 
 /**
@@ -265,6 +258,7 @@ module.exports = {
   deleteUserAndRelatedData,
   createUserEmail,
   verifyJWT,
+
   findUserByEmail,
   emailAuthCheck,
 };

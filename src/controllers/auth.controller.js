@@ -1,5 +1,6 @@
 const { authService } = require('../services');
 const { StatusCodes } = require('http-status-codes');
+const { sendResponse } = require('../utils/responses/responseHandler');
 const kakaoStrategy1 = require('../config/passport/kakaoStrategy1');
 const passport = require('passport');
 
@@ -119,7 +120,7 @@ const kakaoLoginCallback = async (req, res, next) => {
 const authEmail = async (req, res) => {
   try {
     const params = await authService.authEmailTokenVerify(req.url);
-    res.status(200).json({ data: params });
+    sendResponse(res, StatusCodes.OK, {}, '이메일 인증에 성공했습니다.');
   } catch (err) {
     throw err;
   }

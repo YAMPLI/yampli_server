@@ -1,4 +1,5 @@
 const { userService, authService } = require('../services');
+const { sendResponse } = require('../utils/responses/responseHandler');
 const { StatusCodes } = require('http-status-codes');
 
 /**
@@ -14,17 +15,10 @@ const { StatusCodes } = require('http-status-codes');
 const createUserByEmail = async (req, res) => {
   try {
     const createUser = await userService.createUserEmail(req.body);
+    sendResponse(res, StatusCodes.OK, {}, '가입이 완료되었습니다. 가입하신 메일을 확인하여 인증을 진행해주세요.');
     res.status(StatusCodes.OK).json({ data: true, message: '' });
   } catch (err) {
     throw err;
-  }
-};
-const createNickname = async (req, res) => {
-  try {
-    const nickname = await userService.createNickname();
-    res.json({ data: nickname });
-  } catch (err) {
-    console.log();
   }
 };
 
@@ -88,6 +82,5 @@ module.exports = {
   createUser,
   getUsers,
   updateUser,
-  createNickname,
   createUserByEmail,
 };
