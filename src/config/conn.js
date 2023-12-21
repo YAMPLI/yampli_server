@@ -8,7 +8,6 @@ const connect = () => {
   // 배포용이 아닐 경우 디버깅 모드 ON
   if (process.env.NODE_ENV !== 'production') {
     mongoose.set('debug', true); // 몽고 쿼리가 콘솔에서 뜨게 한다.
-    mongoose.set('strictQuery', true);
   }
 
   mongoose

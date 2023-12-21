@@ -1,29 +1,49 @@
-// const axios = require('axios');
-// require('dotenv').config();
+const { extractQueryParams } = require('../api/middlewares/queryStringExtractor');
+const redisClient = require('../config/redisClient');
+const STRINGS = require('../constants/strings');
+const { ForbiddenError, ConflictError } = require('../utils/errors');
+const userService = require('./user.service');
 
-// const kakaoLogin = async (kakaoBody) => {
-//   const code = kakaoBody.query.code;
-//   console.log('code : ' + code);
+/**
+ * 유저 이메일로 전송한 URL의 쿼리스트링 토큰 데이터 확인 후
+ * 이메일 인증 상태로 변경
+ * @param {String} url 이메일 인증 URL
+ * @returns {Boolean}
+ */
+const authEmailTokenVerify = async (url) => {
+  const queryParams = extractQueryParams(url).token;
 
-//   // 사용자 로그인 -> 인가코드수신 -> 토큰발급 -> 사용자 정보 확인
-//   const authToken = await axios.post(
-//     'https://kauth.kakao.com/oauth/token',
-//     {},
-//     {
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//       },
-//       params: {
-//         grant_type: 'authorization_code',
-//         client_id: process.env.CLIENT_ID,
-//         code,
-//         redirect_uri: 'http://127.0.0.1:3306/api/auth/kakao/start',
-//       },
-//     },
-//   );
-//   return authToken;
-// };
+  try {
+    await redisClient.clientConnect();
+    await redisClient.selectDataBase(0);
+    const email = await redisClient.getData(queryParams);
 
-// module.exports = {
-//   kakaoLogin,
-// };
+    if (!email) {
+      console.error(STRINGS.ALERT.NOT_VALID_PAGE_EXPIRE_TOKEN);
+      throw new ForbiddenError(STRINGS.ALERT.NOT_VALID_PAGE_EXPIRE_TOKEN);
+    }
+
+    const user = await userService.findUserByEmail(email);
+    const authStatus = await userService.emailAuthCheck(user);
+
+    if (!authStatus) {
+      user.emailAuth = !user.emailAuth;
+      const userUpdate = await user.save();
+      if (userUpdate) {
+        await redisClient.delData(queryParams);
+        return true;
+      }
+    } else {
+      console.error(STRINGS.ALERT.CHECK_SIGN_EMAIL);
+      throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
+    }
+  } catch (err) {
+    throw err;
+  } finally {
+    await redisClient.disconnect();
+  }
+};
+
+module.exports = {
+  authEmailTokenVerify,
+};

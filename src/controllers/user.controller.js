@@ -1,16 +1,22 @@
-const { userService } = require('../services');
+const { userService, authService } = require('../services');
 const { StatusCodes } = require('http-status-codes');
 
 /**
  * 설계 변경 후 컨트롤러
  */
 
+/**
+ * Email 계정 생성
+ *
+ * @param {Object} req - Express 요청 객체
+ * @param {Object} res - Express 응답 객체
+ */
 const createUserByEmail = async (req, res) => {
   try {
     const createUser = await userService.createUserEmail(req.body);
     res.status(StatusCodes.OK).json({ data: true, message: '' });
-  } catch (e) {
-    throw e;
+  } catch (err) {
+    throw err;
   }
 };
 const createNickname = async (req, res) => {

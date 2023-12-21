@@ -1,11 +1,7 @@
 const { authService } = require('../services');
-const { userService } = require('../services');
 const { StatusCodes } = require('http-status-codes');
 const kakaoStrategy1 = require('../config/passport/kakaoStrategy1');
 const passport = require('passport');
-const url = require('url');
-const axios = require('axios');
-const qs = require('qs');
 
 const kakaoLoginCallback = async (req, res, next) => {
   // const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -114,11 +110,21 @@ const kakaoLoginCallback = async (req, res, next) => {
   // };
 };
 
+/**
+ * 유저 이메일 인증 상태 변경
+ *
+ * @param {Object} req - Express 요청 객체
+ * @param {Object} res - Express 응답 객체
+ */
 const authEmail = async (req, res) => {
-  const params = await userService.verifyJWT(req.url);
-  console.log(res.config);
-  res.status(200).json({ data: params });
+  try {
+    const params = await authService.authEmailTokenVerify(req.url);
+    res.status(200).json({ data: params });
+  } catch (err) {
+    throw err;
+  }
 };
+
 module.exports = {
   kakaoLoginCallback,
   authEmail,

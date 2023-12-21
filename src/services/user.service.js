@@ -2,11 +2,12 @@ const { User, Comment, Like, Group, Reply } = require('../models');
 const { ConflictError, CustomApiError, UnauthenticatedError, ForbiddenError } = require('../utils/errors');
 const { sendAuthMail } = require('../config/email');
 const { extractQueryParams } = require('../api/middlewares/queryStringExtractor');
+const { clientConnect, disconnect, getData, setData, selectDataBase, delData } = require('../config/redisClient');
 const STRINGS = require('../constants/strings');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const xlsx = require('xlsx');
 const path = require('path'); // 엑셀 가져올 때 절대 경로로 가져오기 위한 모듈
-
 /**
  * 설계 변경 후 쿼리
  */
@@ -85,7 +86,9 @@ const findNickname = async (nickname) => {
 };
 
 /**
- * 유저 생성
+ * 유저 데이터 생성
+ * 이미 등록되고 미인증 유저인 경우 새롭게 입력된 데이터로 업데이트
+ *
  * @param {Object} userData
  * @returns {Promise<User>}
  */
@@ -111,7 +114,15 @@ const createUserEmail = async (userData) => {
         nickname: createNickname(),
       });
     }
-    const token = createJWT(email);
+
+    // 일회용 토큰 생성
+    const token = crypto.randomBytes(32).toString('hex');
+
+    await clientConnect();
+    await selectDataBase(0);
+    await setData(token, email, 3600);
+    await disconnect();
+
     const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
     await sendAuthMail(email, verificationLink);
 
@@ -254,4 +265,6 @@ module.exports = {
   deleteUserAndRelatedData,
   createUserEmail,
   verifyJWT,
+  findUserByEmail,
+  emailAuthCheck,
 };
