@@ -110,19 +110,21 @@ const createUserEmail = async (userData) => {
       nickname: createNickname(),
     });
   }
+  try {
+    // 일회용 토큰 생성
+    const token = crypto.randomBytes(32).toString('hex');
 
-  // 일회용 토큰 생성
-  const token = crypto.randomBytes(32).toString('hex');
+    await redisClient.clientConnect();
+    await redisClient.selectDataBase(0);
+    await redisClient.setData(token, email, 3600);
 
-  await redisClient.clientConnect();
-  await redisClient.selectDataBase(0);
-  await redisClient.setData(token, email, 3600);
-  await redisClient.disconnect();
+    const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
+    await sendAuthMail(email, verificationLink);
 
-  const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
-  await sendAuthMail(email, verificationLink);
-
-  return true;
+    return true;
+  } finally {
+    await redisClient.disconnect();
+  }
 };
 
 /**
