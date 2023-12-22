@@ -17,12 +17,16 @@ const errorHandler = (err, req, res, next) => {
     }
     if (!customError) {
       // 추후 클라이언트에서 토큰 받은 후 사용자 인증 미들웨어 걸쳐서 유저벌 료그 기록
-      logger.error(`res : ${req.ip}, ${StatusCodes.INTERNAL_SERVER_ERROR} : ${err.name} - ${err.message}`);
+      logger.error(
+        `res : ${req.ip}, ${StatusCodes.INTERNAL_SERVER_ERROR} : ${err.name} - ${err.message} , Stack: ${err.stack}`,
+      );
 
       return res.status(customError.statusCode).json({ errMessage: customError.errMessage });
     } else {
       console.log('커스텀에러');
-      logger.error(`res : ${req.ip}, ${StatusCodes.INTERNAL_SERVER_ERROR} : ${err.name} - ${err.message}`);
+      logger.error(
+        `res : ${req.ip}, ${StatusCodes.INTERNAL_SERVER_ERROR} : ${err.name} - ${err.message}, Stack: ${err.stack}`,
+      );
 
       return res.status(customError.statusCode).json({ errMessage: customError.errMessage });
     }

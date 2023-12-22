@@ -1,6 +1,6 @@
 const { User, Comment, Like, Group, Reply } = require('../models');
 const { ConflictError, CustomApiError, UnauthenticatedError, ForbiddenError } = require('../utils/errors');
-const { sendAuthMail } = require('../config/email');
+const { sendAuthMail } = require('../utils/email');
 const { extractQueryParams } = require('../api/middlewares/queryStringExtractor');
 const redisClient = require('../config/redisClient');
 const STRINGS = require('../constants/strings');
@@ -133,6 +133,8 @@ const createUserEmail = async (userData) => {
  * @returns {Promise<User>}
  */
 const findUserByEmail = async (email) => {
+  console.log('sdfsf');
+  console.log(email);
   const user = await User.findOne({ email: email });
   return user;
 };

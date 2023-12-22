@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
-const { UnauthenticatedError, ConflictError } = require('../utils/errors');
+const { UnauthenticatedError, InternalServerError } = require('../utils/errors');
 const secretKey = process.env.JWT_SECRET;
 
 /**
  * Access, Refresh JWT 토큰 생성
  * @param {Object} user - 로그인 유저 데이터
- * @returns {Object} - ATK, RTK 생성
+ * @returns {Object} accessToken,refreshToken - ATK, RTK 생성
  */
 const createToken = (user) => {
   try {
@@ -20,7 +20,7 @@ const createToken = (user) => {
 
     const refreshToken = jwt.sign(
       {
-        email: user.eamil,
+        email: user.email,
         role: user.role,
       },
       secretKey,
@@ -28,8 +28,8 @@ const createToken = (user) => {
     );
     return { accessToken, refreshToken };
   } catch (err) {
-    console.error('Error generating token:', err);
-    throw new ConflictError('입력하신 정보를 다시 확인하시고 로그인 해주세요.');
+    // 토큰 생성 -> 서버 에러
+    throw new InternalServerError(`요청 중 문제가 발생되었습니다.\n 잠시 후 다시 시도해주세요.`);
   }
 };
 

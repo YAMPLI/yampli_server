@@ -126,7 +126,16 @@ const authEmail = async (req, res) => {
   }
 };
 
+const loginByEmail = async (req, res) => {
+  try {
+    const token = await authService.userLogin(req.body);
+    sendResponse(res, StatusCodes.OK, token, '로그인 성공');
+  } catch (err) {
+    throw err;
+  }
+};
 module.exports = {
   kakaoLoginCallback,
   authEmail,
+  loginByEmail,
 };
