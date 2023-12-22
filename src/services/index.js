@@ -8,6 +8,7 @@ const commentService = require('./comment.service');
 const replyService = require('./reply.service');
 const spotifyService = require('./spotify.service');
 const chatTextService = require('./chatTextProcessing.service');
+const jwtService = require('./jwt.service');
 module.exports = {
   userService,
   authService,
@@ -19,4 +20,5 @@ module.exports = {
   spotifyService,
   chatTextService,
   playlistSongService,
+  jwtService,
 };
