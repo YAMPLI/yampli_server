@@ -4,7 +4,7 @@ const STRINGS = require('../constants/strings');
 const { ForbiddenError, ConflictError } = require('../utils/errors');
 const userService = require('../services/user.service');
 const jwtService = require('../utils/jwt.util');
-
+const logger = require('../config/logger');
 /**
  * 유저 이메일로 전송한 URL의 쿼리스트링 토큰 데이터 확인 후
  * 이메일 인증 상태로 변경
@@ -33,11 +33,7 @@ const authEmailTokenVerify = async (url) => {
     await user.save();
     await redisClient.delData(queryParams);
   } finally {
-    // 레디스 클라이언트가 연결된 상태인지 확인
-    if (redisClient.status === 'connect' || redisClient.status === 'ready') {
-      console.log('레디스 연결 해제');
-      await redisClient.disconnect();
-    }
+    await redisClient.disconnect();
   }
 };
 
@@ -50,14 +46,12 @@ const userLogin = async (payload) => {
   const { email, password } = payload;
   try {
     const user = await userService.findUserByEmail(email);
-    console.log(user);
     if (user && (await user.isPasswordMatch(password))) {
       const { accessToken, refreshToken } = await jwtService.createToken(user);
 
       await redisClient.clientConnect();
       await redisClient.selectDataBase(1);
       await redisClient.setData(email, refreshToken);
-      console.log(await redisClient.getData(email));
 
       return accessToken;
     } else {
@@ -66,11 +60,7 @@ const userLogin = async (payload) => {
   } catch (err) {
     throw err;
   } finally {
-    // 레디스 클라이언트가 연결된 상태인지 확인
-    if (redisClient.status === 'connect' || redisClient.status === 'ready') {
-      console.log('레디스 연결 해제');
-      await redisClient.disconnect();
-    }
+    await redisClient.disconnect();
   }
 };
 
