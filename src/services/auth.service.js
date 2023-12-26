@@ -33,10 +33,19 @@ const authEmailTokenVerify = async (url) => {
     await user.save();
     await redisClient.delData(queryParams);
   } finally {
-    await redisClient.disconnect();
+    // 레디스 클라이언트가 연결된 상태인지 확인
+    if (redisClient.status === 'connect' || redisClient.status === 'ready') {
+      console.log('레디스 연결 해제');
+      await redisClient.disconnect();
+    }
   }
 };
 
+/**
+ * 로그인 데이터를 사용하여 ATK, RTK 생성 후 클라이언트 전달 및 레디스 저장
+ * @param {Object} payload -로그인 정보(email-password)
+ * @returns {Object} JWT 토큰
+ */
 const userLogin = async (payload) => {
   const { email, password } = payload;
   try {
@@ -44,12 +53,11 @@ const userLogin = async (payload) => {
     console.log(user);
     if (user && (await user.isPasswordMatch(password))) {
       const { accessToken, refreshToken } = await jwtService.createToken(user);
-      console.log('토큰 생성 완료');
 
       await redisClient.clientConnect();
       await redisClient.selectDataBase(1);
       await redisClient.setData(email, refreshToken);
-      console.log('리프레쉬 토큰 저장 완료.');
+      console.log(await redisClient.getData(email));
 
       return accessToken;
     } else {

@@ -123,7 +123,11 @@ const createUserEmail = async (userData) => {
 
     return true;
   } finally {
-    await redisClient.disconnect();
+    // 레디스 클라이언트가 연결된 상태인지 확인
+    if (redisClient.status === 'connect' || redisClient.status === 'ready') {
+      console.log('레디스 연결 해제');
+      await redisClient.disconnect();
+    }
   }
 };
 
