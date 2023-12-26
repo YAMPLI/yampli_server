@@ -18,23 +18,25 @@ const authEmailTokenVerify = async (url) => {
   logger.info(`starting ${functionName} in authService`);
   try {
     const email = await redisClient.getNamespacedData('0', queryParams);
+    const user = await userService.findUserByEmail(email);
 
-    if (!email) {
+    // 레디스 데이터 유효시간 초과 혹은 유저 데이터 없는 경우 인증 코드 유효x 알림
+    if (!email || !user) {
       logger.error(STRINGS.ALERT.NOT_VALID_PAGE_EXPIRE_TOKEN);
       throw new ForbiddenError(STRINGS.ALERT.NOT_VALID_PAGE_EXPIRE_TOKEN);
     }
-
-    const user = await userService.findUserByEmail(email);
-
-    if (!user && user.emailAuth) {
+    // 인증 완료된 데이터 존재 -> 이미 발송된 메일 무효화
+    if (user && user.emailAuth) {
       logger.error(STRINGS.ALERT.CHECK_SIGN_EMAIL);
       throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
     }
     user.emailAuth = true;
     await user.save();
-    await redisClient.delNamespacedData('0', queryParams);
   } catch (err) {
     throw err;
+  } finally {
+    // 완료 시 , 만료된 링크 선택 시 레디스에 저장된 데이터 삭제
+    await redisClient.delNamespacedData('0', queryParams);
   }
 };
 

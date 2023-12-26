@@ -34,7 +34,6 @@ redisClient.clientConnect();
 
 app.use(
   session({
-    cookie: { maxAge: 86400000, secure: false },
     store: new RedisStore({ client: redisClient.getClient() }),
     resave: false,
     secret: 'keyboard cat',

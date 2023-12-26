@@ -118,7 +118,7 @@ const createUserEmail = async (userData) => {
     // 일회용 토큰 생성
     const token = crypto.randomBytes(32).toString('hex');
 
-    await redisClient.setNamespacedData('0', token, email, 3600);
+    await redisClient.setNamespacedData('0', token, email, 300);
     const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
     await sendAuthMail(email, verificationLink);
 
@@ -135,6 +135,11 @@ const createUserEmail = async (userData) => {
  */
 const findUserByEmail = async (email) => {
   const user = await User.findOne({ email: email });
+  return user;
+};
+
+const findUserByKakao = async (kakaoId) => {
+  const user = await User.findOne({ kakaoId: kakaoId });
   return user;
 };
 
@@ -261,7 +266,7 @@ module.exports = {
   deleteUserAndRelatedData,
   createUserEmail,
   verifyJWT,
-
   findUserByEmail,
   emailAuthCheck,
+  findUserByKakao,
 };
