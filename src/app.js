@@ -52,4 +52,9 @@ app.use(errorHandler);
 const server = app.listen(port, () => console.log('server listening on port' + port));
 webSocket(server, app);
 
+// 앱 종료시 레디스 클라이언트 연결 해제
+process.on('SIGINT', async () => {
+  await redisClient.disconnect();
+  process.exit(0);
+});
 module.exports = app;

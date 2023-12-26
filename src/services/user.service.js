@@ -1,9 +1,10 @@
 const { User, Comment, Like, Group, Reply } = require('../models');
 const { ConflictError, CustomApiError, UnauthenticatedError, ForbiddenError } = require('../utils/errors');
-const { sendAuthMail } = require('../config/email');
+const { sendAuthMail } = require('../utils/email');
 const { extractQueryParams } = require('../api/middlewares/queryStringExtractor');
 const redisClient = require('../config/redisClient');
 const STRINGS = require('../constants/strings');
+const logger = require('../config/logger');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const xlsx = require('xlsx');
@@ -93,10 +94,13 @@ const findNickname = async (nickname) => {
  * @returns {Promise<User>}
  */
 const createUserEmail = async (userData) => {
+  const functionName = `createUserEmail`;
   const { email, password } = userData;
   const getUser = await findUserByEmail(email);
   let user;
+  logger.info(`starting ${functionName} in userService.js`);
   if (getUser && (await emailAuthCheck(getUser))) {
+    logger.error(STRINGS.ALERT.CHECK_SIGN_EMAIL);
     throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
   }
   if (getUser) {
@@ -122,7 +126,10 @@ const createUserEmail = async (userData) => {
     await sendAuthMail(email, verificationLink);
 
     return true;
+  } catch (err) {
+    throw err;
   } finally {
+    // 레디스 클라이언트가 연결된 상태인지 확인
     await redisClient.disconnect();
   }
 };

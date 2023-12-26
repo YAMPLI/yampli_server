@@ -8,6 +8,7 @@ const commentService = require('./comment.service');
 const replyService = require('./reply.service');
 const spotifyService = require('./spotify.service');
 const chatTextService = require('./chatTextProcessing.service');
+
 module.exports = {
   userService,
   authService,

@@ -1,7 +1,7 @@
 const { createClient } = require('redis');
 const { REDIS } = require('../constants/strings');
 let client;
-
+let isConnected = false;
 /**
  * Redis 연결
  */
@@ -14,6 +14,17 @@ const createRedisClient = () => {
       console.error(err);
       throw new Error(REDIS.PREFIX_DB_SUFFIX_FAIL('클라이언트 생성'));
     });
+    client.on('connect', () => {
+      console.log('레디스 연결 성공');
+    });
+
+    client.on('ready', () => {
+      isConnected = true;
+    });
+
+    client.on('end', () => {
+      isConnected = false;
+    });
   }
 };
 
@@ -22,13 +33,15 @@ const createRedisClient = () => {
  * @returns client
  */
 const clientConnect = async () => {
-  try {
-    await client.connect();
-    return client;
-  } catch (err) {
-    console.error(err);
-    throw new Error(REDIS.PREFIX_DB_SUFFIX_FAIL('연결'));
+  if (!isConnected) {
+    try {
+      await client.connect();
+    } catch (err) {
+      console.error(err);
+      throw new Error(REDIS.PREFIX_DB_SUFFIX_FAIL('연결'));
+    }
   }
+  return client;
 };
 
 /**
@@ -92,14 +105,17 @@ const delData = async (key) => {
 };
 
 /**
- * 클라이언트 연결 해제
+ * 클라이언트 연결 상태를 확인해여 해제
  */
 const disconnect = async () => {
-  try {
-    await client.quit();
-  } catch (err) {
-    console.error(REDIS.PREFIX_DB_SUFFIX_FAIL('DB 연결 해제'), err);
-    throw new Error(REDIS.PREFIX_DB_SUFFIX_FAIL('DB 연결 해제'));
+  if (isConnected) {
+    try {
+      await client.quit();
+      isConnected = false;
+    } catch (err) {
+      console.error(REDIS.PREFIX_DB_SUFFIX_FAIL('DB 연결 해제'), err);
+      throw new Error(REDIS.PREFIX_DB_SUFFIX_FAIL('DB 연결 해제'));
+    }
   }
 };
 

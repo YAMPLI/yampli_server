@@ -126,7 +126,21 @@ const authEmail = async (req, res) => {
   }
 };
 
+/**
+ * 로그인 처리 후 생성된 ATK 클라이언트 전달
+ * @param {Object} req - Express 요청 객체
+ * @param {Object} res - Express 응답 객체
+ */
+const loginByEmail = async (req, res) => {
+  try {
+    const token = await authService.userLogin(req.body);
+    sendResponse(res, StatusCodes.OK, token, '로그인 성공');
+  } catch (err) {
+    throw err;
+  }
+};
 module.exports = {
   kakaoLoginCallback,
   authEmail,
+  loginByEmail,
 };
