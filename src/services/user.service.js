@@ -118,19 +118,13 @@ const createUserEmail = async (userData) => {
     // 일회용 토큰 생성
     const token = crypto.randomBytes(32).toString('hex');
 
-    await redisClient.clientConnect();
-    await redisClient.selectDataBase(0);
-    await redisClient.setData(token, email, 3600);
-
+    await redisClient.setNamespacedData('0', token, email, 3600);
     const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
     await sendAuthMail(email, verificationLink);
 
     return true;
   } catch (err) {
     throw err;
-  } finally {
-    // 레디스 클라이언트가 연결된 상태인지 확인
-    await redisClient.disconnect();
   }
 };
 

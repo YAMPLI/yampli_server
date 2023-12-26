@@ -16,7 +16,6 @@ const createUserByEmail = async (req, res) => {
   try {
     const createUser = await userService.createUserEmail(req.body);
     sendResponse(res, StatusCodes.OK, {}, '가입이 완료되었습니다. 가입하신 메일을 확인하여 인증을 진행해주세요.');
-    res.status(StatusCodes.OK).json({ data: true, message: '' });
   } catch (err) {
     throw err;
   }

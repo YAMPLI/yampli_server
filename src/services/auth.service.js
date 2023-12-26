@@ -17,9 +17,7 @@ const authEmailTokenVerify = async (url) => {
 
   logger.info(`starting ${functionName} in authService`);
   try {
-    await redisClient.clientConnect();
-    await redisClient.selectDataBase(0);
-    const email = await redisClient.getData(queryParams);
+    const email = await redisClient.getNamespacedData('0', queryParams);
 
     if (!email) {
       logger.error(STRINGS.ALERT.NOT_VALID_PAGE_EXPIRE_TOKEN);
@@ -27,15 +25,16 @@ const authEmailTokenVerify = async (url) => {
     }
 
     const user = await userService.findUserByEmail(email);
+
     if (!user && user.emailAuth) {
       logger.error(STRINGS.ALERT.CHECK_SIGN_EMAIL);
       throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
     }
     user.emailAuth = true;
     await user.save();
-    await redisClient.delData(queryParams);
-  } finally {
-    await redisClient.disconnect();
+    await redisClient.delNamespacedData('0', queryParams);
+  } catch (err) {
+    throw err;
   }
 };
 
@@ -52,11 +51,7 @@ const userLogin = async (payload) => {
     const user = await userService.findUserByEmail(email);
     if (user && (await user.isPasswordMatch(password))) {
       const { accessToken, refreshToken } = await jwtService.createToken(user);
-
-      await redisClient.clientConnect();
-      await redisClient.selectDataBase(1);
-      await redisClient.setData(email, refreshToken);
-
+      await redisClient.setNamespacedData('0', email, refreshToken);
       return accessToken;
     } else {
       logger.error(`아이디/패스워드와 일치하는 사용자가 없습니다.`);
@@ -64,8 +59,6 @@ const userLogin = async (payload) => {
     }
   } catch (err) {
     throw err;
-  } finally {
-    await redisClient.disconnect();
   }
 };
 

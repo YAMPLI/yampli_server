@@ -133,6 +133,7 @@ const authEmail = async (req, res) => {
  */
 const loginByEmail = async (req, res) => {
   try {
+    req.session.userId = req.body;
     const token = await authService.userLogin(req.body);
     sendResponse(res, StatusCodes.OK, token, '로그인 성공');
   } catch (err) {

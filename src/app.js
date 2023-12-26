@@ -2,15 +2,16 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const redisClient = require('./config/redisClient.js');
 const session = require('express-session');
-const MemoryStore = require('memorystore')(session);
+const RedisStore = require('connect-redis').default;
+// const MemoryStore = require('memorystore')(session);
 const cors = require('cors');
 const passport = require('passport');
 const webSocket = require('../socket');
 const errorHandler = require('./api/middlewares/errorHandler');
 const route = require('./api/routes');
 const conn = require('./config/conn.js');
-const { createRedisClient } = require('./config/redisClient.js');
 const passportConfig = require('./config/passport/passportConfig');
 
 const app = express();
@@ -25,16 +26,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 // origin -> ngrok 테스트 완료 후 CLIENT_HOST로 변경
 app.use(cors({ credentials: true, origin: process.env.NGINX_URI }));
-// app.use(cors());
 conn();
-createRedisClient();
-// passportConfig();
+
+// redis 클리아언트 생성 및 연결
+redisClient.createRedisClient();
+redisClient.clientConnect();
+
 app.use(
   session({
     cookie: { maxAge: 86400000, secure: false },
-    store: new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
-    }),
+    store: new RedisStore({ client: redisClient.getClient() }),
     resave: false,
     secret: 'keyboard cat',
     saveUninitialized: false,

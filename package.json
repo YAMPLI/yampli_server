@@ -18,6 +18,7 @@
     "chai": "^4.3.8",
     "chai-http": "^4.4.0",
     "child_process": "^1.0.2",
+    "connect-redis": "^7.1.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
