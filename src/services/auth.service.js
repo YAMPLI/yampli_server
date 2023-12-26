@@ -12,21 +12,23 @@ const logger = require('../config/logger');
  * @returns {Boolean}
  */
 const authEmailTokenVerify = async (url) => {
+  const functionName = `authEmailTokenVerify`;
   const queryParams = extractQueryParams(url).token;
 
+  logger.info(`starting ${functionName} in authService`);
   try {
     await redisClient.clientConnect();
     await redisClient.selectDataBase(0);
     const email = await redisClient.getData(queryParams);
 
     if (!email) {
-      console.error(STRINGS.ALERT.NOT_VALID_PAGE_EXPIRE_TOKEN);
+      logger.error(STRINGS.ALERT.NOT_VALID_PAGE_EXPIRE_TOKEN);
       throw new ForbiddenError(STRINGS.ALERT.NOT_VALID_PAGE_EXPIRE_TOKEN);
     }
 
     const user = await userService.findUserByEmail(email);
     if (!user && user.emailAuth) {
-      console.error(STRINGS.ALERT.CHECK_SIGN_EMAIL);
+      logger.error(STRINGS.ALERT.CHECK_SIGN_EMAIL);
       throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
     }
     user.emailAuth = true;
@@ -43,7 +45,9 @@ const authEmailTokenVerify = async (url) => {
  * @returns {Object} JWT 토큰
  */
 const userLogin = async (payload) => {
+  const functionName = `userLogin`;
   const { email, password } = payload;
+  logger.info(`starting ${functionName} in authService`);
   try {
     const user = await userService.findUserByEmail(email);
     if (user && (await user.isPasswordMatch(password))) {
@@ -55,6 +59,7 @@ const userLogin = async (payload) => {
 
       return accessToken;
     } else {
+      logger.error(`아이디/패스워드와 일치하는 사용자가 없습니다.`);
       throw new ConflictError('아이디/패스워드와 일치하는 사용자가 없습니다.\n 확인하시고 다시 시도해주세요.');
     }
   } catch (err) {

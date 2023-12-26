@@ -68,6 +68,15 @@ const transports = [
     maxFiles: 7,
     zippedArchive: true,
   }),
+  // Info 레벨 로그를 저장할 파일 설정
+  new WinstonDaily({
+    level: 'info',
+    datePattern: 'YYYY-MM-DD',
+    dirname: path.join(__dirname, logDir, '/info'), // 로그 파일을 저장할 디렉토리
+    filename: '%DATE%.info.log', // 파일명 형식
+    maxFiles: 30, // 로그 파일 유지 개수
+    zippedArchive: true, // 로그 파일 압축 여부
+  }),
 ];
 
 const Logger = winston.createLogger({
