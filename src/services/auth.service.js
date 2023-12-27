@@ -47,14 +47,20 @@ const authEmailTokenVerify = async (url) => {
  */
 const userLogin = async (payload) => {
   const functionName = `userLogin`;
-  const { email, password } = payload;
+  const { email, password, kakaoId } = payload;
   logger.info(`starting ${functionName} in authService`);
   try {
     const user = await userService.findUserByEmail(email);
+    if (!user.kakaoId && kakaoId) {
+      // 카카오 아이디 연동
+      user.kakaoId = kakaoId;
+      await user.save();
+      return { message: '기존 계정과 카카오 계정 연동에 성공했습니다. 다시 로그인 해주세요.' };
+    }
     if (user && (await user.isPasswordMatch(password))) {
       const { accessToken, refreshToken } = await jwtService.createToken(user);
       await redisClient.setNamespacedData('0', email, refreshToken);
-      return accessToken;
+      return {accessToken};
     } else {
       logger.error(`아이디/패스워드와 일치하는 사용자가 없습니다.`);
       throw new ConflictError('아이디/패스워드와 일치하는 사용자가 없습니다.\n 확인하시고 다시 시도해주세요.');

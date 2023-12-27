@@ -35,15 +35,43 @@ redisClient.clientConnect();
 app.use(
   session({
     store: new RedisStore({ client: redisClient.getClient() }),
-    resave: false,
+    resave: true, // 변경사항 발생 시 만료 시간 갱신
+    rolling: true, // 클라이언트 요청 시 만료 시간 갱신
     secret: 'keyboard cat',
     saveUninitialized: false,
+    cookie: {
+      maxAge: 30 * 60 * 1000, // 만료시간 30분 설정
+    },
   }),
 );
-
 // passport-> 세션 설정 후 미들웨어 등록
 app.use(passport.initialize());
 app.use(passport.session());
+
+// 세션 사용 위한 테스트
+// app.post('/test', (req, res) => {
+//   const data = req.body;
+//   // 사용자 인증 로직...
+//   if (data) {
+//     // 사용자 인증 성공 시, 세션에 정보 저장
+//     req.session.userId = data.email;
+//     res.send('Logged in!');
+//   } else {
+//     res.send('Authentication failed');
+//   }
+// });
+
+// app.get('/test2', (req, res) => {
+//   console.log(req.session);
+//   if (req.session.userId) {
+//     // 세션에서 userId 가져오기
+//     const userId = req.session.userId;
+//     // userId를 사용하여 필요한 작업 수행
+//     res.send(`User ID is: ${userId}`);
+//   } else {
+//     res.send('You are not logged in!');
+//   }
+// });
 
 app.use('/api', route);
 app.use(errorHandler);

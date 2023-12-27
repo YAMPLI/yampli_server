@@ -89,13 +89,15 @@ const findNickname = async (nickname) => {
 /**
  * 유저 데이터 생성
  * 이미 등록되고 미인증 유저인 경우 새롭게 입력된 데이터로 업데이트
+ * 세션에서 가져온 카카오 아이디를 확인하여 이메일 계정과 연동
  *
  * @param {Object} userData
  * @returns {Promise<User>}
  */
 const createUserEmail = async (userData) => {
   const functionName = `createUserEmail`;
-  const { email, password } = userData;
+  // 세션에 저장된 카카오 아이디 사용(카카오 연동)
+  const { email, password, kakaoId } = userData;
   const getUser = await findUserByEmail(email);
   let user;
   logger.info(`starting ${functionName} in userService.js`);
@@ -106,12 +108,16 @@ const createUserEmail = async (userData) => {
   if (getUser) {
     getUser.password = password;
     getUser.nickname = createNickname();
+    if (kakaoId) {
+      getUser.kakaoId = kakaoId;
+    }
     user = await getUser.save();
   } else {
     user = await User.create({
       email: email,
       password: password,
       nickname: createNickname(),
+      kakaoId: kakaoId || null,
     });
   }
   try {

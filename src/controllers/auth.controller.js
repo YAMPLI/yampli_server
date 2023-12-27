@@ -121,7 +121,6 @@ const kakaoGetData = async (req, res) => {
   try {
     const kakaoToken = await kakaoAPI.fetchKakaoToken(authCode);
     const user = await kakaoAPI.fetchKakaoUserInfo(kakaoToken);
-    console.log(user.id);
     const userInfo = await userService.findUserByKakao(user.id);
 
     // 유저 정보가 존재하지 않는 경우
@@ -161,9 +160,18 @@ const authEmail = async (req, res) => {
  */
 const loginByEmail = async (req, res) => {
   try {
-    req.session.userId = req.body;
-    const token = await authService.userLogin(req.body);
-    sendResponse(res, StatusCodes.OK, token, '로그인 성공');
+    const kakaoId = req.session.kakaoId;
+    const data = {
+      ...req.body,
+      kakaoId,
+    };
+    const result = await authService.userLogin(data);
+    if (result.accessToken) {
+      sendResponse(res, StatusCodes.OK, { token: result.accessToken }, '로그인 성공');
+    } else {
+      sendResponse(res, StatusCodes.MOVED_PERMANENTLY, { url: '/login' }, result.message);
+    }
+    await delete rea.session.kakaoId;
   } catch (err) {
     throw err;
   }
