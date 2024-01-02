@@ -146,7 +146,8 @@ const kakaoGetData = async (req, res) => {
  */
 const authEmail = async (req, res) => {
   try {
-    const params = await authService.authEmailTokenVerify(req.url);
+    const token = req.body['token'];
+    const params = await authService.authEmailTokenVerify(token);
     sendResponse(res, StatusCodes.OK, {}, '이메일 인증에 성공했습니다.');
   } catch (err) {
     throw err;

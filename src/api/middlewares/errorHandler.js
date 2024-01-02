@@ -24,9 +24,7 @@ const errorHandler = (err, req, res, next) => {
       return res.status(customError.statusCode).json({ errMessage: customError.errMessage });
     } else {
       console.log('커스텀에러');
-      logger.error(
-        `res : ${req.ip}, ${StatusCodes.INTERNAL_SERVER_ERROR} : ${err.name} - ${err.message}, Stack: ${err.stack}`,
-      );
+      logger.error(`res : ${req.ip}, ${customError.statusCode} : ${err.name} - ${err.message}, Stack: ${err.stack}`);
 
       return res.status(customError.statusCode).json({ errMessage: customError.errMessage });
     }

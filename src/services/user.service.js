@@ -125,7 +125,7 @@ const createUserEmail = async (userData) => {
     const token = crypto.randomBytes(32).toString('hex');
 
     await redisClient.setNamespacedData('0', token, email, 300);
-    const verificationLink = `${process.env.SERVER_URL}/auth/auth-email?token=${token}`;
+    const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
     await sendAuthMail(email, verificationLink);
 
     return true;

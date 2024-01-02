@@ -11,13 +11,12 @@ const logger = require('../config/logger');
  * @param {String} url 이메일 인증 URL
  * @returns {Boolean}
  */
-const authEmailTokenVerify = async (url) => {
+const authEmailTokenVerify = async (token) => {
   const functionName = `authEmailTokenVerify`;
-  const queryParams = extractQueryParams(url).token;
 
   logger.info(`starting ${functionName} in authService`);
   try {
-    const email = await redisClient.getNamespacedData('0', queryParams);
+    const email = await redisClient.getNamespacedData('0', token);
     const user = await userService.findUserByEmail(email);
 
     // 레디스 데이터 유효시간 초과 혹은 유저 데이터 없는 경우 인증 코드 유효x 알림
@@ -36,7 +35,7 @@ const authEmailTokenVerify = async (url) => {
     throw err;
   } finally {
     // 완료 시 , 만료된 링크 선택 시 레디스에 저장된 데이터 삭제
-    await redisClient.delNamespacedData('0', queryParams);
+    await redisClient.delNamespacedData('0', token);
   }
 };
 
@@ -60,7 +59,7 @@ const userLogin = async (payload) => {
     if (user && (await user.isPasswordMatch(password))) {
       const { accessToken, refreshToken } = await jwtService.createToken(user);
       await redisClient.setNamespacedData('0', email, refreshToken);
-      return {accessToken};
+      return { accessToken };
     } else {
       logger.error(`아이디/패스워드와 일치하는 사용자가 없습니다.`);
       throw new ConflictError('아이디/패스워드와 일치하는 사용자가 없습니다.\n 확인하시고 다시 시도해주세요.');
