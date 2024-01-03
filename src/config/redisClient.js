@@ -2,6 +2,13 @@ const { createClient } = require('redis');
 const { REDIS } = require('../constants/strings');
 let client;
 let isConnected = false;
+
+const namespaces = {
+  0: 'authMail:',
+  1: 'rtk:',
+  2: 'sess:',
+  3: 'cache:',
+};
 /**
  * Redis 연결
  */
@@ -46,6 +53,7 @@ const clientConnect = async () => {
 
 /**
  * 사용할 DB 선택
+ * (#32_namespace를 활용하여 하나의 레디스 저장소만 사용하기 때문에 불필요한 기능.)
  * @param {Number} number 사용할 DB
  */
 const selectDataBase = async (number) => {
@@ -55,6 +63,39 @@ const selectDataBase = async (number) => {
     console.error(REDIS.PREFIX_DB_SUFFIX_FAIL('DB 선택'), err);
     throw new Error(REDIS.PREFIX_DB_SUFFIX_FAIL('DB 선택'), err);
   }
+};
+
+/**
+ * key값에 namespace 추가 후 데어티 저장
+ *
+ * @param {String} namespace
+ * @param {String} key
+ * @param {String || Object} value
+ * @param {Number} timeout
+ */
+const setNamespacedData = async (namespace, key, value, timeout = null) => {
+  const namespacedKey = namespaces[namespace] + key;
+  await setData(namespacedKey, value, timeout);
+};
+
+/**
+ * key값으로 'namespace:key'을 설정하여 일치하는 데이터 반환
+ * @param {String} namespace
+ * @param {String} key
+ * @returns {Object}
+ */
+const getNamespacedData = async (namespace, key) => {
+  const namespacedKey = namespaces[namespace] + key;
+  return await getData(namespacedKey);
+};
+/**
+ * key값으로 'namespace:key'을 설정하여 일치하는 데이터 삭제
+ * @param {String} namespace
+ * @param {String} key
+ */
+const delNamespacedData = async (namespace, key) => {
+  const namespacedKey = namespaces[namespace] + key;
+  await delData(namespacedKey);
 };
 
 /**
@@ -119,6 +160,14 @@ const disconnect = async () => {
   }
 };
 
+/**
+ * 연결된 클라이언트 반환
+ * @returns client
+ */
+const getClient = () => {
+  return client;
+};
+
 module.exports = {
   createRedisClient,
   clientConnect,
@@ -127,4 +176,8 @@ module.exports = {
   getData,
   selectDataBase,
   delData,
+  setNamespacedData,
+  getNamespacedData,
+  delNamespacedData,
+  getClient,
 };

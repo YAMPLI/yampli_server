@@ -5,7 +5,7 @@ const userSchema = mongoose.Schema({
   email: { type: String, required: true, lowercase: true, unique: true },
   password: { type: String, required: true },
   nickname: { type: String, minLength: 1, maxLength: 100, required: true },
-  kakaoId: { type: String, unique: true, sparse: true }, // sparse : 유니크 필드 null 중복 허용
+  kakaoId: { type: String, unique: true, sparse: true, default: null }, // sparse : 유니크 필드 null 중복 허용
   createdAt: { type: Date, default: Date.now }, // 작성 시간을 저장하는 필드 추가
   isActive: { type: Boolean, default: true },
   emailAuth: { type: Boolean, default: false },

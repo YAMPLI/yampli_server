@@ -1,8 +1,11 @@
 const { authService } = require('../services');
 const { StatusCodes } = require('http-status-codes');
 const { sendResponse } = require('../utils/responses/responseHandler');
+const { userService } = require('../services');
+const kakaoAPI = require('../integrations/kakaoAPI');
 const kakaoStrategy1 = require('../config/passport/kakaoStrategy1');
 const passport = require('passport');
+const url = require('url');
 
 const kakaoLoginCallback = async (req, res, next) => {
   // const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -111,6 +114,30 @@ const kakaoLoginCallback = async (req, res, next) => {
   // };
 };
 
+const kakaoGetData = async (req, res) => {
+  const authCode = url.parse(req.url, true).query['code'];
+  console.log(`카카오 인가코드 : ${authCode}`);
+
+  try {
+    const kakaoToken = await kakaoAPI.fetchKakaoToken(authCode);
+    const user = await kakaoAPI.fetchKakaoUserInfo(kakaoToken);
+    const userInfo = await userService.findUserByKakao(user.id);
+
+    // 유저 정보가 존재하지 않는 경우
+    if (!userInfo) {
+      req.session.kakaoId = user.id;
+      sendResponse(
+        res,
+        StatusCodes.MOVED_PERMANENTLY,
+        { url: '/login' },
+        `카카오 계정 연동을 위해 가입하신 메일로 로그인 해주세요. \n 만약 처음이시라면 이메일 회원가입 후 이용해주세요.`,
+      );
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
 /**
  * 유저 이메일 인증 상태 변경
  *
@@ -119,7 +146,8 @@ const kakaoLoginCallback = async (req, res, next) => {
  */
 const authEmail = async (req, res) => {
   try {
-    const params = await authService.authEmailTokenVerify(req.url);
+    const token = req.body['token'];
+    const params = await authService.authEmailTokenVerify(token);
     sendResponse(res, StatusCodes.OK, {}, '이메일 인증에 성공했습니다.');
   } catch (err) {
     throw err;
@@ -133,8 +161,18 @@ const authEmail = async (req, res) => {
  */
 const loginByEmail = async (req, res) => {
   try {
-    const token = await authService.userLogin(req.body);
-    sendResponse(res, StatusCodes.OK, token, '로그인 성공');
+    const kakaoId = req.session.kakaoId;
+    const data = {
+      ...req.body,
+      kakaoId,
+    };
+    const result = await authService.userLogin(data);
+    if (result.accessToken) {
+      sendResponse(res, StatusCodes.OK, { token: result.accessToken }, '로그인 성공');
+    } else {
+      sendResponse(res, StatusCodes.MOVED_PERMANENTLY, { url: '/login' }, result.message);
+    }
+    await delete rea.session.kakaoId;
   } catch (err) {
     throw err;
   }
@@ -143,4 +181,5 @@ module.exports = {
   kakaoLoginCallback,
   authEmail,
   loginByEmail,
+  kakaoGetData,
 };

@@ -14,9 +14,17 @@ const { StatusCodes } = require('http-status-codes');
  */
 const createUserByEmail = async (req, res) => {
   try {
-    const createUser = await userService.createUserEmail(req.body);
+    const kakaoId = req.session.kakaoId;
+    const data = {
+      ...req.body,
+      kakaoId,
+    };
+
+    const createUser = await userService.createUserEmail(data);
+
+    // 세션 데이터 사용 후 삭제
+    await delete req.session.kakaoId;
     sendResponse(res, StatusCodes.OK, {}, '가입이 완료되었습니다. 가입하신 메일을 확인하여 인증을 진행해주세요.');
-    res.status(StatusCodes.OK).json({ data: true, message: '' });
   } catch (err) {
     throw err;
   }
