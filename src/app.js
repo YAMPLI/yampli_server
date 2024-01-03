@@ -13,6 +13,7 @@ const errorHandler = require('./api/middlewares/errorHandler');
 const route = require('./api/routes');
 const conn = require('./config/conn.js');
 const passportConfig = require('./config/passport/passportConfig');
+const { extractQueryParams } = require('./utils/queryStringExtractor.js');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -25,7 +26,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 // origin -> ngrok 테스트 완료 후 CLIENT_HOST로 변경
-app.use(cors({ credentials: true, origin: process.env.NGINX_URI }));
+app.use(
+  cors({
+    // 'http://localhost:3000',
+    // origin: process.env.NGINX_URI,
+    origin: 'http://example1.local:8080',
+    credentials: true,
+  }),
+);
 conn();
 
 // redis 클리아언트 생성 및 연결
@@ -35,11 +43,13 @@ redisClient.clientConnect();
 app.use(
   session({
     store: new RedisStore({ client: redisClient.getClient() }),
+    proxy: true,
     resave: true, // 변경사항 발생 시 만료 시간 갱신
     rolling: true, // 클라이언트 요청 시 만료 시간 갱신
     secret: 'keyboard cat',
     saveUninitialized: false,
     cookie: {
+      // domain: '.example1.local',
       maxAge: 30 * 60 * 1000, // 만료시간 30분 설정
     },
   }),
@@ -49,29 +59,41 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // 세션 사용 위한 테스트
-// app.post('/test', (req, res) => {
-//   const data = req.body;
-//   // 사용자 인증 로직...
-//   if (data) {
-//     // 사용자 인증 성공 시, 세션에 정보 저장
-//     req.session.userId = data.email;
-//     res.send('Logged in!');
-//   } else {
-//     res.send('Authentication failed');
-//   }
-// });
+app.post('/te/test', (req, res) => {
+  const data = req.body;
+  // 사용자 인증 로직...
+  if (data) {
+    // 사용자 인증 성공 시, 세션에 정보 저장
+    req.session.userId = data.email;
+    res.send('Logged in!');
+  } else {
+    res.send('Authentication failed');
+  }
+});
+app.get('/test1', (req, res) => {
+  const data = extractQueryParams(req.url).email;
+  console.log(data);
+  // 사용자 인증 로직...
+  if (data) {
+    // 사용자 인증 성공 시, 세션에 정보 저장
+    req.session.userId = data;
+    res.send('Logged in!');
+  } else {
+    res.send('Authentication failed');
+  }
+});
 
-// app.get('/test2', (req, res) => {
-//   console.log(req.session);
-//   if (req.session.userId) {
-//     // 세션에서 userId 가져오기
-//     const userId = req.session.userId;
-//     // userId를 사용하여 필요한 작업 수행
-//     res.send(`User ID is: ${userId}`);
-//   } else {
-//     res.send('You are not logged in!');
-//   }
-// });
+app.get('/test2', (req, res) => {
+  console.log(req.session);
+  if (req.session.userId) {
+    // 세션에서 userId 가져오기
+    const userId = req.session.userId;
+    // userId를 사용하여 필요한 작업 수행
+    res.send(`User ID is: ${userId}`);
+  } else {
+    res.send('You are not logged in!');
+  }
+});
 
 app.use('/api', route);
 app.use(errorHandler);

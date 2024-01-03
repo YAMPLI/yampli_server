@@ -2,6 +2,7 @@ const { authService } = require('../services');
 const { StatusCodes } = require('http-status-codes');
 const { sendResponse } = require('../utils/responses/responseHandler');
 const { userService } = require('../services');
+const { extractQueryParams } = require('../utils/queryStringExtractor');
 const kakaoAPI = require('../integrations/kakaoAPI');
 const kakaoStrategy1 = require('../config/passport/kakaoStrategy1');
 const passport = require('passport');
@@ -115,14 +116,15 @@ const kakaoLoginCallback = async (req, res, next) => {
 };
 
 const kakaoGetData = async (req, res) => {
-  const authCode = url.parse(req.url, true).query['code'];
+  const authCode = extractQueryParams(req.url).code;
   console.log(`카카오 인가코드 : ${authCode}`);
 
   try {
     const kakaoToken = await kakaoAPI.fetchKakaoToken(authCode);
     const user = await kakaoAPI.fetchKakaoUserInfo(kakaoToken);
+    console.log(`user : ${JSON.stringify(user, null, 2)}`);
     const userInfo = await userService.findUserByKakao(user.id);
-
+    console.log(`userInfo : ${userInfo}`);
     // 유저 정보가 존재하지 않는 경우
     if (!userInfo) {
       req.session.kakaoId = user.id;
