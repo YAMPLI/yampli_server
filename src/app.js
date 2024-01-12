@@ -30,7 +30,7 @@ app.use(
   cors({
     // 'http://localhost:3000',
     // origin: process.env.NGINX_URI,
-    origin: 'http://example1.local:8080',
+    origin: 'http://yampli.com:8080',
     credentials: true,
   }),
 );

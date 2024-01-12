@@ -131,7 +131,8 @@ const kakaoGetData = async (req, res) => {
       sendResponse(
         res,
         StatusCodes.MOVED_PERMANENTLY,
-        { url: '/login' },
+        null,
+        '',
         `카카오 계정 연동을 위해 가입하신 메일로 로그인 해주세요. \n 만약 처음이시라면 이메일 회원가입 후 이용해주세요.`,
       );
     }

@@ -16,7 +16,7 @@ module.exports = (callbackURL) => {
         clientID: process.env.KAKAO_CLIENT_ID, // 카카오 로그인에서 발급받은 REST API 키
         // 카카오 로그인 Redirect URI 경로
         // callbackURL: 'http://localhost:3000/kakao/oauth',
-        callbackURL: 'http://example1.local:8080/kakao/oauth',
+        // callbackURL: 'http://example1.local:8080/kakao/oauth',
         // callbackURL: `${clientURI}/kakao/oauth`,
         // callbackURL: process.env.NGROK_URI + '/kakao/oauth',
       },
