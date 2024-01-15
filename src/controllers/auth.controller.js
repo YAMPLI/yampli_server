@@ -170,12 +170,12 @@ const loginByEmail = async (req, res) => {
       kakaoId,
     };
     const result = await authService.userLogin(data);
+    kakaoId && result && delete req.session.kakaoId;
     if (result.accessToken) {
       sendResponse(res, StatusCodes.OK, { token: result.accessToken }, '로그인 성공');
     } else {
-      sendResponse(res, StatusCodes.MOVED_PERMANENTLY, { url: '/login' }, result.message);
+      sendResponse(res, StatusCodes.MOVED_PERMANENTLY, { url: '/login' }, '', result.message);
     }
-    await delete rea.session.kakaoId;
   } catch (err) {
     throw err;
   }
