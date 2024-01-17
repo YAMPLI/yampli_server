@@ -19,12 +19,22 @@ const createUserByEmail = async (req, res) => {
       ...req.body,
       kakaoId,
     };
-
+    console.log(`userSession : ${JSON.stringify(req.session, null, 2)}`);
     const createUser = await userService.createUserEmail(data);
 
     // 세션 데이터 사용 후 삭제
-    await delete req.session.kakaoId;
-    sendResponse(res, StatusCodes.OK, {}, '가입이 완료되었습니다. 가입하신 메일을 확인하여 인증을 진행해주세요.');
+    kakaoId && createUser && delete req.session.kakaoId;
+
+    if (kakaoId && !req.session.kakaoId) {
+      sendResponse(
+        res,
+        StatusCodes.OK,
+        {},
+        '가입 및 카카오 연동이 완료되었습니다. 가입하신 메일을 확인하여 인증을 진행해주세요. ',
+      );
+    } else {
+      sendResponse(res, StatusCodes.OK, {}, '가입이 완료되었습니다. 가입하신 메일을 확인하여 인증을 진행해주세요.');
+    }
   } catch (err) {
     throw err;
   }

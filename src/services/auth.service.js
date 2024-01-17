@@ -1,4 +1,3 @@
-const { extractQueryParams } = require('../api/middlewares/queryStringExtractor');
 const redisClient = require('../config/redisClient');
 const STRINGS = require('../constants/strings');
 const { ForbiddenError, ConflictError } = require('../utils/errors');

@@ -2,6 +2,7 @@ const { authService } = require('../services');
 const { StatusCodes } = require('http-status-codes');
 const { sendResponse } = require('../utils/responses/responseHandler');
 const { userService } = require('../services');
+const { extractQueryParams } = require('../utils/queryStringExtractor');
 const kakaoAPI = require('../integrations/kakaoAPI');
 const kakaoStrategy1 = require('../config/passport/kakaoStrategy1');
 const passport = require('passport');
@@ -115,22 +116,25 @@ const kakaoLoginCallback = async (req, res, next) => {
 };
 
 const kakaoGetData = async (req, res) => {
-  const authCode = url.parse(req.url, true).query['code'];
+  const authCode = extractQueryParams(req.url).code;
   console.log(`카카오 인가코드 : ${authCode}`);
 
   try {
     const kakaoToken = await kakaoAPI.fetchKakaoToken(authCode);
     const user = await kakaoAPI.fetchKakaoUserInfo(kakaoToken);
+    console.log(`user : ${JSON.stringify(user, null, 2)}`);
     const userInfo = await userService.findUserByKakao(user.id);
-
+    console.log(`userInfo : ${userInfo}`);
     // 유저 정보가 존재하지 않는 경우
     if (!userInfo) {
+      console.log(`userSession : ${JSON.stringify(req.session, null, 2)}`);
       req.session.kakaoId = user.id;
       sendResponse(
         res,
         StatusCodes.MOVED_PERMANENTLY,
         { url: '/login' },
-        `카카오 계정 연동을 위해 가입하신 메일로 로그인 해주세요. \n 만약 처음이시라면 이메일 회원가입 후 이용해주세요.`,
+        '',
+        `카카오 계정과 연동된 회원이 없습니다.|카카오 계정 연동을 위해 가입하신 메일로 로그인 해주세요. \n 처음이시라면 이메일 회원가입 후 이용해주세요.`,
       );
     }
   } catch (err) {
@@ -167,12 +171,14 @@ const loginByEmail = async (req, res) => {
       kakaoId,
     };
     const result = await authService.userLogin(data);
+    kakaoId && result && delete req.session.kakaoId;
     if (result.accessToken) {
+      // 로그인 성공(카카오 연동 x)
       sendResponse(res, StatusCodes.OK, { token: result.accessToken }, '로그인 성공');
     } else {
-      sendResponse(res, StatusCodes.MOVED_PERMANENTLY, { url: '/login' }, result.message);
+      // 카카오 연동 진행 시 수행
+      sendResponse(res, StatusCodes.MOVED_PERMANENTLY, { url: '/login' }, '', result.message);
     }
-    await delete rea.session.kakaoId;
   } catch (err) {
     throw err;
   }

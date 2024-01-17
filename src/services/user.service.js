@@ -1,7 +1,7 @@
 const { User, Comment, Like, Group, Reply } = require('../models');
 const { ConflictError, CustomApiError, UnauthenticatedError, ForbiddenError } = require('../utils/errors');
 const { sendAuthMail } = require('../utils/email');
-const { extractQueryParams } = require('../api/middlewares/queryStringExtractor');
+const { extractQueryParams } = require('../utils/queryStringExtractor');
 const redisClient = require('../config/redisClient');
 const STRINGS = require('../constants/strings');
 const logger = require('../config/logger');
@@ -101,6 +101,7 @@ const createUserEmail = async (userData) => {
   const getUser = await findUserByEmail(email);
   let user;
   logger.info(`starting ${functionName} in userService.js`);
+  logger.info(`세션에 저장된 카카오 아이디 확인  ${kakaoId} in userService.js`);
   if (getUser && (await emailAuthCheck(getUser))) {
     logger.error(STRINGS.ALERT.CHECK_SIGN_EMAIL);
     throw new ConflictError(STRINGS.ALERT.CHECK_SIGN_EMAIL);
@@ -117,7 +118,7 @@ const createUserEmail = async (userData) => {
       email: email,
       password: password,
       nickname: createNickname(),
-      kakaoId: kakaoId || null,
+      kakaoId: kakaoId,
     });
   }
   try {
