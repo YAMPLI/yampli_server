@@ -127,13 +127,14 @@ const kakaoGetData = async (req, res) => {
     console.log(`userInfo : ${userInfo}`);
     // 유저 정보가 존재하지 않는 경우
     if (!userInfo) {
+      console.log(`userSession : ${JSON.stringify(req.session, null, 2)}`);
       req.session.kakaoId = user.id;
       sendResponse(
         res,
         StatusCodes.MOVED_PERMANENTLY,
-        null,
+        { url: '/login' },
         '',
-        `카카오 계정 연동을 위해 가입하신 메일로 로그인 해주세요. \n 만약 처음이시라면 이메일 회원가입 후 이용해주세요.`,
+        `카카오 계정과 연동된 회원이 없습니다.|카카오 계정 연동을 위해 가입하신 메일로 로그인 해주세요. \n 처음이시라면 이메일 회원가입 후 이용해주세요.`,
       );
     }
   } catch (err) {
@@ -172,8 +173,10 @@ const loginByEmail = async (req, res) => {
     const result = await authService.userLogin(data);
     kakaoId && result && delete req.session.kakaoId;
     if (result.accessToken) {
+      // 로그인 성공(카카오 연동 x)
       sendResponse(res, StatusCodes.OK, { token: result.accessToken }, '로그인 성공');
     } else {
+      // 카카오 연동 진행 시 수행
       sendResponse(res, StatusCodes.MOVED_PERMANENTLY, { url: '/login' }, '', result.message);
     }
   } catch (err) {
